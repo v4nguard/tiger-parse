@@ -6,7 +6,7 @@ use std::{
 
 use crate::{Offset, TigerReadable};
 
-pub struct Pointer<T: TigerReadable>(pub T);
+pub struct Pointer<T: TigerReadable>(pub T, u64);
 
 impl<T: TigerReadable> TigerReadable for Pointer<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
@@ -22,13 +22,19 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
 
         reader.seek(std::io::SeekFrom::Start(save_pos))?;
 
-        Ok(Pointer(data))
+        Ok(Pointer(data, ptr))
     }
 
     const ID: Option<u32> = None;
 
     const ZEROCOPY: bool = false;
     const SIZE: usize = std::mem::size_of::<Offset>();
+}
+
+impl<T: TigerReadable> Pointer<T> {
+    pub fn offset(&self) -> u64 {
+        self.1
+    }
 }
 
 impl<T: TigerReadable> Deref for Pointer<T> {
@@ -47,11 +53,11 @@ impl<T: TigerReadable + Debug> Debug for Pointer<T> {
 
 impl<T: TigerReadable + Clone> Clone for Pointer<T> {
     fn clone(&self) -> Self {
-        Pointer(self.0.clone())
+        Pointer(self.0.clone(), self.1)
     }
 }
 
-pub struct PointerOptional<T: TigerReadable>(pub Option<T>);
+pub struct PointerOptional<T: TigerReadable>(pub Option<T>, u64);
 
 impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
@@ -61,7 +67,7 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
         let ptr_pos = reader.stream_position()?;
         let ptr_data = Offset::read_ds_endian(reader, endian)? as u64;
         if ptr_data == 0 {
-            return Ok(PointerOptional(None));
+            return Ok(PointerOptional(None, ptr_pos));
         }
 
         let ptr = ptr_pos + ptr_data;
@@ -73,13 +79,19 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
 
         reader.seek(std::io::SeekFrom::Start(save_pos))?;
 
-        Ok(PointerOptional(Some(data)))
+        Ok(PointerOptional(Some(data), ptr_pos))
     }
 
     const ID: Option<u32> = None;
 
     const ZEROCOPY: bool = false;
     const SIZE: usize = std::mem::size_of::<Offset>();
+}
+
+impl<T: TigerReadable> PointerOptional<T> {
+    pub fn offset(&self) -> Option<u64> {
+        self.0.as_ref().map(|_| self.1)
+    }
 }
 
 impl<T: TigerReadable> Deref for PointerOptional<T> {
