@@ -9,6 +9,11 @@ pub trait PackageManagerExt {
     fn read_tag_struct<T: TigerReadable>(&self, tag: impl Into<TagHash>) -> anyhow::Result<T>;
 
     fn read_tag64_struct<T: TigerReadable>(&self, hash: impl Into<TagHash64>) -> anyhow::Result<T>;
+
+    fn read_named_tag_struct<T: TigerReadable>(
+        &self,
+        tag_name: impl AsRef<str>,
+    ) -> anyhow::Result<T>;
 }
 
 impl PackageManagerExt for destiny_pkg::PackageManager {
@@ -40,6 +45,31 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
             .get(&hash.0)
             .context("Hash not found")?
             .hash32;
+
+        self.read_tag_struct(tag)
+    }
+
+    fn read_named_tag_struct<T: TigerReadable>(
+        &self,
+        tag_name: impl AsRef<str>,
+    ) -> anyhow::Result<T> {
+        let tag = self
+            .get_named_tag(
+                tag_name.as_ref(),
+                T::ID.with_context(|| {
+                    format!(
+                        "Type '{}' does not have a tag ID set",
+                        std::any::type_name::<T>()
+                    )
+                })?,
+            )
+            .with_context(|| {
+                format!(
+                    "Tag '{}' with ID 0x{:X} not found",
+                    tag_name.as_ref(),
+                    T::ID.unwrap()
+                )
+            })?;
 
         self.read_tag_struct(tag)
     }

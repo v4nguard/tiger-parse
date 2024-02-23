@@ -325,8 +325,8 @@ dependencies = [
 
 [[package]]
 name = "destiny-pkg"
-version = "0.8.0"
-source = "git+https://github.com/v4nguard/destiny-pkg.git#d178df48fab86df5c544bd7c233c528c37862020"
+version = "0.9.0"
+source = "git+https://github.com/v4nguard/destiny-pkg.git#6fa3d5453590f64e9b80aa3abfe30f781c399bd2"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -339,9 +339,9 @@ dependencies = [
  "json",
  "lazy_static",
  "libloading",
- "nohash-hasher",
  "parking_lot",
  "rayon",
+ "rustc-hash",
  "serde",
  "serde_json",
  "tracing",
@@ -430,9 +430,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
 dependencies = [
  "either",
 ]
@@ -486,12 +486,6 @@ name = "log"
 version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
-
-[[package]]
-name = "nohash-hasher"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
 
 [[package]]
 name = "num-traits"
@@ -618,6 +612,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustc-hash"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
 name = "ryu"
 version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -701,33 +701,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "thiserror"
-version = "1.0.50"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
-dependencies = [
- "thiserror-impl",
-]
-
-[[package]]
-name = "thiserror-impl"
-version = "1.0.50"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.32",
-]
-
-[[package]]
 name = "tiger-parse"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "destiny-pkg",
  "glam",
- "thiserror",
  "tiger-parse-derive",
  "tracing",
 ]
