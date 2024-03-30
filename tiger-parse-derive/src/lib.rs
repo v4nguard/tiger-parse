@@ -35,6 +35,8 @@ struct OptsField {
     field_offset: Option<u64>,
     #[darling(rename = "ftype")]
     field_type: FieldType,
+
+    debug: bool,
 }
 
 #[proc_macro_attribute]
@@ -86,9 +88,21 @@ pub fn tiger_tag(
                 });
             }
 
+            if d.debug {
+                fieldstream.extend(quote! {
+                    let offset = reader.stream_position()?;
+                });
+            }
+
             fieldstream.extend(quote! {
                 let #fident = <_>::read_ds_endian(reader, endian)?;
             });
+
+            if d.debug {
+                fieldstream.extend(quote! {
+                    eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", std::any::type_name::<Self>(), stringify!(#fident), offset, #fident);
+                });
+            }
 
             fieldstream_assign.extend(quote! {
                 #fident,

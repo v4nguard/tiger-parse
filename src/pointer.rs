@@ -13,7 +13,7 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
         reader: &mut R,
         endian: crate::Endian,
     ) -> anyhow::Result<Self> {
-        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
+        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)?;
         let save_pos = reader.stream_position()?;
 
         reader.seek(std::io::SeekFrom::Start(ptr))?;
@@ -65,7 +65,7 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
         endian: crate::Endian,
     ) -> anyhow::Result<Self> {
         let ptr_pos = reader.stream_position()?;
-        let ptr_data = Offset::read_ds_endian(reader, endian)? as u64;
+        let ptr_data = Offset::read_ds_endian(reader, endian)?;
         if ptr_data == 0 {
             return Ok(PointerOptional(None, ptr_pos));
         }

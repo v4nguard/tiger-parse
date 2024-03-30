@@ -9,6 +9,7 @@ pub struct SStaticMesh {
     pub file_size: u64,
     pub unk8: TagHash,
     pub unkc: u32,
+    #[tag(debug)]
     pub materials: Vec<TagHash>,
     pub unk20: Vec<SStaticMeshOverlay>, // Overlay/transparent meshes
     pub unk30: [u32; 2],
@@ -108,7 +109,7 @@ pub struct SStaticMeshOverlay {
 pub type TagHash = u32;
 
 pub fn main() {
-    let data = include_bytes!("../39a00081_ref-446d8080_8_0.bin");
+    let data = include_bytes!("testdata.bin");
     let mut cursor = Cursor::new(data);
 
     let v: SStaticMesh = TigerReadable::read_ds_endian(&mut cursor, Endian::Little).unwrap();

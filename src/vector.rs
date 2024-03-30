@@ -11,7 +11,7 @@ impl<T: TigerReadable> TigerReadable for Vec<T> {
         endian: crate::Endian,
     ) -> anyhow::Result<Self> {
         let size = Size::read_ds_endian(reader, endian)? as usize;
-        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
+        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)?;
         let save_pos = reader.stream_position()?;
 
         if size == 0 {
