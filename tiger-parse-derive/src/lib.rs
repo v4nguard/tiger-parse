@@ -89,6 +89,7 @@ pub fn tiger_tag(
             }
 
             if d.debug {
+                zerocopy_base_safety = false;
                 fieldstream.extend(quote! {
                     let offset = reader.stream_position()?;
                 });

@@ -106,7 +106,12 @@ pub struct SStaticMeshOverlay {
     pub material: TagHash,
 }
 
-pub type TagHash = u32;
+#[derive(Debug, Clone)]
+#[tiger_tag(id = 0xFFFFFFFF)]
+pub struct TagHash {
+    #[tag(debug)]
+    pub value: u32,
+}
 
 pub fn main() {
     let data = include_bytes!("testdata.bin");
