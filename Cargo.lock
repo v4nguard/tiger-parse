@@ -105,9 +105,9 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "binrw"
-version = "0.12.0"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e8318fda24dc135cdd838f57a2b5ccb6e8f04ff6b6c65528c4bd9b5fcdc5cf6"
+checksum = "173901312e9850391d4d7c1318c4e099fdc037d61870fca427429830efdb4e5f"
 dependencies = [
  "array-init",
  "binrw_derive",
@@ -116,9 +116,9 @@ dependencies = [
 
 [[package]]
 name = "binrw_derive"
-version = "0.12.0"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db0832bed83248115532dfb25af54fae1c83d67a2e4e3e2f591c13062e372e7e"
+checksum = "cb515fdd6f8d3a357c8e19b8ec59ef53880807864329b1cb1cba5c53bf76557e"
 dependencies = [
  "either",
  "owo-colors",
@@ -325,9 +325,9 @@ dependencies = [
 
 [[package]]
 name = "destiny-pkg"
-version = "0.9.2"
+version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7bc826e44dda791c180582afd6fc07eefd4733e7467fe3cc905dbc84d1b6bd2"
+checksum = "50e81d877c30e1b8e853e2bcf2c69d4dbdbd8a18ad8293333066c3e256ba700d"
 dependencies = [
  "aes",
  "aes-gcm",
