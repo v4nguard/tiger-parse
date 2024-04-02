@@ -11,7 +11,7 @@ impl<T: TigerReadable> TigerReadable for Vec<T> {
         endian: crate::Endian,
     ) -> anyhow::Result<Self> {
         let size = Size::read_ds_endian(reader, endian)? as usize;
-        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)?;
+        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
         let save_pos = reader.stream_position()?;
 
         if size == 0 {
@@ -20,13 +20,14 @@ impl<T: TigerReadable> TigerReadable for Vec<T> {
 
         reader.seek(std::io::SeekFrom::Start(ptr))?;
         let size_header = Size::read_ds_endian(reader, endian)? as usize;
-        assert!(
-            size == size_header,
+        assert_eq!(
+            size,
+            size_header,
             "Size mismatch in {}",
             std::any::type_name::<Self>()
         );
         #[cfg(feature = "check_types")]
-        if T::ID.is_some() && T::ID != Some(u32::MAX) {
+        if T::ID.is_some() && (T::ID != Some(u32::MAX) || cfg!(feature = "check_types_strict")) {
             let element_type = u32::read_ds_endian(reader, endian)?;
             ensure!(
                 element_type == T::ID.unwrap(),
@@ -75,9 +76,50 @@ impl<T: TigerReadable> TigerReadable for Vec<T> {
         Ok(data)
     }
 
+    const ZEROCOPY: bool = false;
+
     // TODO(cohae): multiversion struct ids
     const ID: Option<u32> = None;
-
-    const ZEROCOPY: bool = false;
     const SIZE: usize = std::mem::size_of::<(Size, Offset)>();
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use crate::TigerReadable;
+
+    pub type TestType = (u32, f32, i64);
+
+    #[test]
+    fn test_vec_zerocopy() {
+        assert_eq!(TestType::ZEROCOPY, true);
+
+        const DATA: [u8; 112] = [
+            0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xB8, 0x9F, 0x80, 0x80, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF,
+            0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x7B, 0x00, 0x00, 0x00, 0x00, 0x40, 0x9A, 0x44,
+            0xD4, 0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0xBE, 0xAD, 0xDE, 0x00, 0xFF,
+            0x7F, 0x47, 0x64, 0x05, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xCE, 0xFA, 0xED, 0xFE,
+            0x00, 0x20, 0xA7, 0x44, 0xEF, 0xBE, 0x0D, 0xF0, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF,
+            0x00, 0x00, 0x90, 0x4F, 0xC3, 0x47, 0xEF, 0xBE, 0x37, 0x13, 0x00, 0x00, 0x00, 0x00,
+        ];
+
+        let mut cursor = Cursor::new(&DATA);
+        let vec: Vec<TestType> =
+            TigerReadable::read_ds_endian(&mut cursor, crate::Endian::Little).unwrap();
+
+        assert_eq!(vec.len(), 4);
+
+        assert_eq!(
+            &vec,
+            &[
+                (123, 1234.0, -300,),
+                (0xDEADBEEF, 65535.0, 132452,),
+                (0xFEEDFACE, 1337.0, 0xF00DBEEF,),
+                (0xFFFF, 99999.125, 0x1337BEEF,),
+            ]
+        )
+    }
 }

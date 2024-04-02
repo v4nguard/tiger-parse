@@ -21,7 +21,7 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
         let tag = tag.into();
 
         #[cfg(feature = "check_types")]
-        if T::ID.is_some() && T::ID != Some(u32::MAX) {
+        if T::ID.is_some() && (T::ID != Some(u32::MAX) || cfg!(feature = "check_types_strict")) {
             if let Some(entry) = self.get_entry(tag) {
                 let tag_type = entry.reference;
                 ensure!(

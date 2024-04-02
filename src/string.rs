@@ -22,9 +22,9 @@ impl TigerReadable for NullString {
         Err(anyhow::anyhow!("NullString too long! (>1240)"))
     }
 
-    const ID: Option<u32> = None;
-
     const ZEROCOPY: bool = false;
+
+    const ID: Option<u32> = None;
     const SIZE: usize = 0;
 }
 

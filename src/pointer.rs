@@ -13,7 +13,7 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
         reader: &mut R,
         endian: crate::Endian,
     ) -> anyhow::Result<Self> {
-        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)?;
+        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
         let save_pos = reader.stream_position()?;
 
         reader.seek(std::io::SeekFrom::Start(ptr))?;
@@ -25,9 +25,9 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
         Ok(Pointer(data, ptr))
     }
 
-    const ID: Option<u32> = None;
-
     const ZEROCOPY: bool = false;
+
+    const ID: Option<u32> = None;
     const SIZE: usize = std::mem::size_of::<Offset>();
 }
 
@@ -82,9 +82,9 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
         Ok(PointerOptional(Some(data), ptr_pos))
     }
 
-    const ID: Option<u32> = None;
-
     const ZEROCOPY: bool = false;
+
+    const ID: Option<u32> = None;
     const SIZE: usize = std::mem::size_of::<Offset>();
 }
 
@@ -209,8 +209,8 @@ impl TigerReadable for ResourcePointerWithClass {
         })
     }
 
-    const ID: Option<u32> = None;
     const ZEROCOPY: bool = false;
+    const ID: Option<u32> = None;
     const SIZE: usize = 8;
 }
 
