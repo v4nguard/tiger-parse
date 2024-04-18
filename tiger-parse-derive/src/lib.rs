@@ -23,7 +23,13 @@ enum FieldType {
 #[derive(FromMeta, Default, Debug)]
 struct Opts {
     #[darling(rename = "id")]
-    struct_id: u32,
+    struct_id: Option<u32>,
+
+    #[darling(rename = "etype")]
+    struct_type: Option<u8>,
+    #[darling(rename = "esubtype")]
+    struct_subtype: Option<u8>,
+
     #[darling(rename = "size")]
     struct_size: Option<usize>,
 }
@@ -56,8 +62,33 @@ pub fn tiger_tag(
     let ident = struc.ident.clone();
 
     let struct_id = opts.struct_id;
-    let impl_struct_id = quote! {
-        const ID: Option<u32> = Some(#struct_id);
+    let impl_struct_id = if let Some(struct_id) = struct_id {
+        quote! {
+            const ID: Option<u32> = Some(#struct_id);
+        }
+    } else {
+        quote! {}
+    };
+
+    if opts.struct_subtype.is_some() && opts.struct_type.is_none() {
+        return quote! {
+            compile_error!("If subtype is defined, type must be defined as well");
+        }
+        .into();
+    }
+
+    let impl_struct_type = if let (Some(st), sbt) = (opts.struct_type, opts.struct_subtype) {
+        let sbt = if let Some(sbt) = sbt {
+            quote! { Some(#sbt) }
+        } else {
+            quote! { None }
+        };
+
+        quote! {
+            const ETYPE: Option<(u8, Option<u8>)> = Some((#st, #sbt));
+        }
+    } else {
+        quote! {}
     };
 
     let mut fieldstream_zerocopy = TokenStream::new();
@@ -156,6 +187,7 @@ pub fn tiger_tag(
             const ZEROCOPY: bool = #zerocopy_base_safety #fieldstream_zerocopy;
 
             #impl_struct_id
+            #impl_struct_type
             #impl_struct_size
         }
     };

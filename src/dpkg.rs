@@ -33,6 +33,25 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
             }
         }
 
+        #[cfg(feature = "check_types")]
+        if let Some((etype, esubtype)) = T::ETYPE {
+            if let Some(entry) = self.get_entry(tag) {
+                ensure!(
+                    etype == entry.file_type
+                        && (esubtype.is_none() || Some(entry.file_subtype) == esubtype),
+                    "Tag type mismatch! Expected {}:{}, got {}:{} (tag {tag})",
+                    etype,
+                    if let Some(subtype) = esubtype {
+                        subtype.to_string()
+                    } else {
+                        "ANY".to_string()
+                    },
+                    entry.file_type,
+                    entry.file_subtype
+                );
+            }
+        }
+
         let data = self.read_tag(tag)?;
         let mut cursor = Cursor::new(&data);
         T::read_ds_endian(&mut cursor, self.version.endian().into())

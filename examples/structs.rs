@@ -107,7 +107,7 @@ pub struct SStaticMeshOverlay {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF)]
+#[tiger_tag(etype = 32, esubtype = 4)]
 pub struct TagHash {
     #[tag(debug)]
     pub value: u32,
@@ -119,4 +119,6 @@ pub fn main() {
 
     let v: SStaticMesh = TigerReadable::read_ds_endian(&mut cursor, Endian::Little).unwrap();
     println!("{:#x?}", v);
+
+    assert_eq!(TagHash::ETYPE, Some((32, Some(4))));
 }
