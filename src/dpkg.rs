@@ -26,9 +26,10 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
                 let tag_type = entry.reference;
                 ensure!(
                     tag_type == T::ID.unwrap(),
-                    "Tag type mismatch! Expected 0x{:08X}, got 0x{:08X} (tag {tag})",
+                    "Tag type mismatch! Expected 0x{:08X}, got 0x{:08X} (tag {tag}) (type {})",
                     T::ID.unwrap(),
-                    tag_type
+                    tag_type,
+                    std::any::type_name::<T>()
                 );
             }
         }
@@ -39,7 +40,7 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
                 ensure!(
                     etype == entry.file_type
                         && (esubtype.is_none() || Some(entry.file_subtype) == esubtype),
-                    "Tag type mismatch! Expected {}:{}, got {}:{} (tag {tag})",
+                    "Tag type mismatch! Expected {}:{}, got {}:{} (tag {tag}) (type {})",
                     etype,
                     if let Some(subtype) = esubtype {
                         subtype.to_string()
@@ -47,7 +48,8 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
                         "ANY".to_string()
                     },
                     entry.file_type,
-                    entry.file_subtype
+                    entry.file_subtype,
+                    std::any::type_name::<T>()
                 );
             }
         }
