@@ -1,5 +1,5 @@
 use darling::{ast::NestedMeta, FromField, FromMeta};
-use proc_macro2::{self, TokenStream};
+use proc_macro2::{self, Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 
 #[derive(Debug, Clone, Copy, Default, FromMeta)]
@@ -103,52 +103,63 @@ pub fn tiger_tag(
     let mut fieldstream = TokenStream::new();
     let mut fieldstream_assign = TokenStream::new();
     let mut uses_offsets = false;
-    for f in struc.fields.iter_mut() {
+    let mut is_tuple = false;
+    for (i, f) in struc.fields.iter_mut().enumerate() {
         let d = OptsField::from_field(f).expect("Invalid field options");
         // Remove the tag attribute from the field
         f.attrs.retain(|v| !v.meta.path().is_ident("tag"));
 
-        let fident = f.ident.clone();
+        // let fident = f.ident.clone();
+        // let fident = if struc.fields.is_tuple() {
+        //     Some(Ident::new(format!("f{}", i).as_str(), Span::call_site()))
+        // } else {
+        //     f.ident.clone()
+        // };
+        let fident = if let Some(fident) = f.ident.clone() {
+            fident
+        } else {
+            is_tuple = true;
+            Ident::new(format!("f{}", i).as_str(), Span::call_site())
+        };
+
         let ftype = f.ty.clone();
-        if let Some(fident) = fident {
-            if let Some(field_offset) = d.field_offset {
-                uses_offsets = true;
-                zerocopy_base_safety = false;
-                fieldstream.extend(quote! {
-                    reader.seek(::std::io::SeekFrom::Start(start_pos+#field_offset))?;
-                });
-            }
-
-            if d.debug {
-                zerocopy_base_safety = false;
-                fieldstream.extend(quote! {
-                    let offset = reader.stream_position()?;
-                });
-            }
-
+        if let Some(field_offset) = d.field_offset {
+            uses_offsets = true;
+            zerocopy_base_safety = false;
             fieldstream.extend(quote! {
-                let #fident = <_>::read_ds_endian(reader, endian)?;
-            });
-
-            if d.debug {
-                fieldstream.extend(quote! {
-                    eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", std::any::type_name::<Self>(), stringify!(#fident), offset, #fident);
-                });
-            }
-
-            fieldstream_assign.extend(quote! {
-                #fident,
-            });
-
-            fieldstream_size.extend(quote! {
-                + <#ftype>::SIZE
-            });
-
-            // Carry over the zerocopy flag from fields. All fields must be ZEROCOPY for the struct to be ZEROCOPY
-            fieldstream_zerocopy.extend(quote! {
-                && <#ftype>::ZEROCOPY
+                reader.seek(::std::io::SeekFrom::Start(start_pos+#field_offset))?;
             });
         }
+
+        if d.debug {
+            zerocopy_base_safety = false;
+            fieldstream.extend(quote! {
+                let offset = reader.stream_position()?;
+            });
+        }
+
+        fieldstream.extend(quote! {
+            let #fident = <_>::read_ds_endian(reader, endian)?;
+        });
+
+        if d.debug {
+            fieldstream.extend(quote! {
+                    eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", std::any::type_name::<Self>(), stringify!(#fident), offset, #fident);
+                });
+        }
+
+        fieldstream_assign.extend(quote! {
+            #fident,
+        });
+
+        fieldstream_size.extend(quote! {
+            + <#ftype>::SIZE
+        });
+
+        // Carry over the zerocopy flag from fields. All fields must be ZEROCOPY for the struct to be ZEROCOPY
+        fieldstream_zerocopy.extend(quote! {
+            && <#ftype as ::tiger_parse::TigerReadable>::ZEROCOPY
+        });
     }
 
     let impl_struct_size = if let Some(defined_size) = opts.struct_size {
@@ -168,6 +179,18 @@ pub fn tiger_tag(
         }
     };
 
+    let return_statement = if is_tuple {
+        quote! {
+            Self(#fieldstream_assign)
+        }
+    } else {
+        quote! {
+            Self {
+                #fieldstream_assign
+            }
+        }
+    };
+
     let item_stream = struc.to_token_stream();
     let output = quote! {
         #[repr(C)]
@@ -179,9 +202,7 @@ pub fn tiger_tag(
 
                 #fieldstream
 
-                Ok(Self {
-                    #fieldstream_assign
-                })
+                Ok(#return_statement)
             }
 
             const ZEROCOPY: bool = #zerocopy_base_safety #fieldstream_zerocopy;

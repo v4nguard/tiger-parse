@@ -113,6 +113,9 @@ pub struct TagHash {
     pub value: u32,
 }
 
+#[tiger_tag]
+struct Test(i32, u32);
+
 pub fn main() {
     let data = include_bytes!("testdata.bin");
     let mut cursor = Cursor::new(data);
@@ -121,4 +124,11 @@ pub fn main() {
     println!("{:#x?}", v);
 
     assert_eq!(TagHash::ETYPE, Some((32, Some(4))));
+
+    const TEST: [u8; 8] = [0xfe, 0xff, 0xff, 0xff, 0x7b, 0x00, 0x00, 0x00];
+    let mut cursor = std::io::Cursor::new(&TEST);
+
+    let test = Test::read_ds(&mut cursor).unwrap();
+    assert_eq!(test.0, -2);
+    assert_eq!(test.1, 123);
 }

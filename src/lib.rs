@@ -20,6 +20,7 @@ pub mod string;
 
 #[cfg(feature = "destiny_pkg")]
 pub mod dpkg;
+
 #[cfg(feature = "destiny_pkg")]
 pub use dpkg::PackageManagerExt;
 
