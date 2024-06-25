@@ -325,9 +325,9 @@ dependencies = [
 
 [[package]]
 name = "destiny-pkg"
-version = "0.10.1"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5c7674e65d84e9d267316000bcff78fca5d87086bd1b3f4bc687a36472ad6f9"
+checksum = "8e38129da4d312e83c0c22bc48d2c83358687ea5d8d8e19634d5bbfe2e6a2e09"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -405,9 +405,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.27.0"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e05e7e6723e3455f4818c7b26e855439f7546cf617ef669d1adedb8669e5cb9"
+checksum = "779ae4bf7e8421cf91c0b3b64e7e8b40b862fba4d393f59150042de7c4965a94"
 
 [[package]]
 name = "heck"
@@ -716,7 +716,7 @@ dependencies = [
 
 [[package]]
 name = "tiger-parse"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anyhow",
  "destiny-pkg",

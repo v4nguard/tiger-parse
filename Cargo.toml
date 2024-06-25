@@ -1,15 +1,15 @@
 [package]
 name = "tiger-parse"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.72"
-destiny-pkg = { version = "^0.10", optional = true }
+destiny-pkg = { version = "^0.11", optional = true }
 tracing = { version = "0.1.37", optional = true }
-glam = { version = "0.27.0" }
+glam = { version = ">0.27.0" }
 tiger-parse-derive = { path = "./tiger-parse-derive" }
 # thiserror = "1.0.50"
 
