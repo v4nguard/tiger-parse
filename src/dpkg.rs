@@ -62,7 +62,8 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
     fn read_tag64_struct<T: TigerReadable>(&self, hash: impl Into<TagHash64>) -> anyhow::Result<T> {
         let hash = hash.into();
         let tag = self
-            .hash64_table
+            .lookup
+            .tag64_entries
             .get(&hash.0)
             .context("Hash not found")?
             .hash32;
