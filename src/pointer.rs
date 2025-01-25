@@ -70,7 +70,7 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
             return Ok(PointerOptional(None, ptr_pos));
         }
 
-        let ptr = ptr_pos + ptr_data;
+        let ptr = ptr_pos + u64::from(ptr_data);
         let save_pos = reader.stream_position()?;
 
         reader.seek(std::io::SeekFrom::Start(ptr))?;
@@ -223,5 +223,39 @@ impl Debug for ResourcePointerWithClass {
             self.parent_tag,
             self.class_type.to_be()
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use crate::{Pointer, TigerReadable};
+
+    #[test]
+    fn test_pointer() {
+        #[cfg(not(feature = "32bit"))]
+        let data: [u8; 0x28] = [
+            0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+            0xEF, 0xBE, 0xDA, 0xED, 0xFE, 0x00, 0x00, 0x00, 
+        ];
+
+        #[cfg(feature = "32bit")]
+        let data: [u8; 0x28] = [
+            0x20, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+            0xEF, 0xBE, 0xDA, 0xED, 0xFE, 0x00, 0x00, 0x00, 
+        ];
+
+        let mut cursor = Cursor::new(&data);
+        let ptr: Pointer<u64> =
+            TigerReadable::read_ds_endian(&mut cursor, crate::Endian::Little).unwrap();
+
+            println!("{:X}", *ptr);
+        assert_eq!(
+            *ptr,
+            0xfeed_da_beef
+        )
     }
 }
