@@ -322,9 +322,9 @@ dependencies = [
 
 [[package]]
 name = "destiny-pkg"
-version = "0.14.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daeb4e7dc68ce26f5b234514248c8b187221ca8f1471b4e1809dd0cb221fe571"
+checksum = "f111e9922f99a612cdbc40a987b599dbbf79af8c2c36b8cf79e966163461ea52"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -390,9 +390,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.29.2"
+version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc46dd3ec48fdd8e693a98d2b8bafae273a2d54c1de02a2a7e3d57d501f39677"
+checksum = "bf3aa70d918d2b234126ff4f850f628f172542bf0603ded26b8ee36e5e22d5f9"
 
 [[package]]
 name = "heck"
