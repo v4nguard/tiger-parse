@@ -4,6 +4,7 @@ pub use pointer::{Pointer, PointerOptional, ResourcePointer};
 #[cfg(feature = "destiny_pkg")]
 pub use pointer::ResourcePointerWithClass;
 
+pub use padding::Padding;
 pub use string::NullString;
 pub use tiger_parse_derive::tiger_tag;
 pub use variant::{OptionalVariantPointer, VariantEnum, VariantPointer};
@@ -12,6 +13,7 @@ pub type FnvHash = u32;
 
 mod array;
 mod glam;
+mod padding;
 mod tuples;
 mod variant;
 mod vector;

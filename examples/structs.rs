@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use tiger_parse::{Endian, TigerReadable};
+use tiger_parse::{Endian, Padding, TigerReadable};
 use tiger_parse_derive::tiger_tag;
 
 #[derive(Debug, Clone)]
@@ -8,7 +8,7 @@ use tiger_parse_derive::tiger_tag;
 pub struct SStaticMesh {
     pub file_size: u64,
     pub unk8: TagHash,
-    pub unkc: u32,
+    pub _pad: Padding<4>,
     #[tag(debug)]
     pub materials: Vec<TagHash>,
     pub unk20: Vec<SStaticMeshOverlay>, // Overlay/transparent meshes
