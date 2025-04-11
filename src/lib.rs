@@ -6,12 +6,14 @@ pub use pointer::ResourcePointerWithClass;
 
 pub use string::NullString;
 pub use tiger_parse_derive::tiger_tag;
+pub use variant::{OptionalVariantPointer, VariantEnum, VariantPointer};
 
 pub type FnvHash = u32;
 
 mod array;
 mod glam;
 mod tuples;
+mod variant;
 mod vector;
 
 pub mod error;
