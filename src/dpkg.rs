@@ -1,7 +1,7 @@
 use std::io::Cursor;
 
 use anyhow::{ensure, Context};
-use destiny_pkg::{TagHash, TagHash64};
+use tiger_pkg::{TagHash, TagHash64, Version};
 
 use crate::TigerReadable;
 
@@ -16,7 +16,7 @@ pub trait PackageManagerExt {
     ) -> anyhow::Result<T>;
 }
 
-impl PackageManagerExt for destiny_pkg::PackageManager {
+impl PackageManagerExt for tiger_pkg::PackageManager {
     fn read_tag_struct<T: TigerReadable>(&self, tag: impl Into<TagHash>) -> anyhow::Result<T> {
         let tag = tag.into();
 
@@ -97,11 +97,11 @@ impl PackageManagerExt for destiny_pkg::PackageManager {
     }
 }
 
-impl From<destiny_pkg::Endian> for crate::Endian {
-    fn from(endian: destiny_pkg::Endian) -> Self {
+impl From<tiger_pkg::Endian> for crate::Endian {
+    fn from(endian: tiger_pkg::Endian) -> Self {
         match endian {
-            destiny_pkg::Endian::Big => crate::Endian::Big,
-            destiny_pkg::Endian::Little => crate::Endian::Little,
+            tiger_pkg::Endian::Big => crate::Endian::Big,
+            tiger_pkg::Endian::Little => crate::Endian::Little,
         }
     }
 }

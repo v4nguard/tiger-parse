@@ -159,7 +159,7 @@ impl Debug for ResourcePointer {
     }
 }
 
-#[cfg(feature = "destiny_pkg")]
+#[cfg(feature = "tiger_pkg")]
 #[derive(Clone, Copy)]
 pub struct ResourcePointerWithClass {
     pub offset: u64,
@@ -167,11 +167,11 @@ pub struct ResourcePointerWithClass {
 
     pub resource_type: u32,
     /// Usually just the current tag
-    pub parent_tag: destiny_pkg::TagHash,
+    pub parent_tag: tiger_pkg::TagHash,
     pub class_type: u32,
 }
 
-#[cfg(feature = "destiny_pkg")]
+#[cfg(feature = "tiger_pkg")]
 impl TigerReadable for ResourcePointerWithClass {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
@@ -184,7 +184,7 @@ impl TigerReadable for ResourcePointerWithClass {
                 offset: 0,
                 is_valid: false,
                 resource_type: u32::MAX,
-                parent_tag: destiny_pkg::TagHash::NONE,
+                parent_tag: tiger_pkg::TagHash::NONE,
                 class_type: u32::MAX,
             });
         }
@@ -194,7 +194,7 @@ impl TigerReadable for ResourcePointerWithClass {
         reader.seek(SeekFrom::Start(offset_base))?;
         reader.seek(SeekFrom::Current(offset - 4))?;
         let resource_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
-        let parent_tag: destiny_pkg::TagHash = TigerReadable::read_ds_endian(reader, endian)?;
+        let parent_tag: tiger_pkg::TagHash = TigerReadable::read_ds_endian(reader, endian)?;
         let class_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
 
         let true_offset = reader.stream_position()?;
@@ -214,7 +214,7 @@ impl TigerReadable for ResourcePointerWithClass {
     const SIZE: usize = 8;
 }
 
-#[cfg(feature = "destiny_pkg")]
+#[cfg(feature = "tiger_pkg")]
 impl Debug for ResourcePointerWithClass {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
@@ -236,26 +236,23 @@ mod tests {
     fn test_pointer() {
         #[cfg(not(feature = "32bit"))]
         let data: [u8; 0x28] = [
-            0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-            0xEF, 0xBE, 0xDA, 0xED, 0xFE, 0x00, 0x00, 0x00, 
+            0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0xBE, 0xDA, 0xED, 0xFE, 0x00, 0x00, 0x00,
         ];
 
         #[cfg(feature = "32bit")]
         let data: [u8; 0x28] = [
-            0x20, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-            0xEF, 0xBE, 0xDA, 0xED, 0xFE, 0x00, 0x00, 0x00, 
+            0x20, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0xBE, 0xDA, 0xED, 0xFE, 0x00, 0x00, 0x00,
         ];
 
         let mut cursor = Cursor::new(&data);
         let ptr: Pointer<u64> =
             TigerReadable::read_ds_endian(&mut cursor, crate::Endian::Little).unwrap();
 
-            println!("{:X}", *ptr);
-        assert_eq!(
-            *ptr,
-            0xfeed_da_beef
-        )
+        println!("{:X}", *ptr);
+        assert_eq!(*ptr, 0xfeed_da_beef)
     }
 }

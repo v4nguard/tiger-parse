@@ -1,7 +1,7 @@
 pub use anyhow::Result;
 pub use pointer::{Pointer, PointerOptional, ResourcePointer};
 
-#[cfg(feature = "destiny_pkg")]
+#[cfg(feature = "tiger_pkg")]
 pub use pointer::ResourcePointerWithClass;
 
 pub use padding::Padding;
@@ -22,10 +22,10 @@ pub mod error;
 pub mod pointer;
 pub mod string;
 
-#[cfg(feature = "destiny_pkg")]
+#[cfg(feature = "tiger_pkg")]
 pub mod dpkg;
 
-#[cfg(feature = "destiny_pkg")]
+#[cfg(feature = "tiger_pkg")]
 pub use dpkg::PackageManagerExt;
 
 use std::io::{Read, Seek};
