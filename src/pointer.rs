@@ -12,7 +12,7 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
         let save_pos = reader.stream_position()?;
 
@@ -63,7 +63,7 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let ptr_pos = reader.stream_position()?;
         let ptr_data = Offset::read_ds_endian(reader, endian)?;
         if ptr_data == 0 {
@@ -119,7 +119,7 @@ impl TigerReadable for ResourcePointer {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
         let offset: i64 = TigerReadable::read_ds_endian(reader, endian)?;
         if offset == 0 || offset == i64::MAX {
@@ -176,7 +176,7 @@ impl TigerReadable for ResourcePointerWithClass {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
         let offset: i64 = TigerReadable::read_ds_endian(reader, endian)?;
         if offset == 0 || offset == i64::MAX {

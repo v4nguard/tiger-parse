@@ -1,4 +1,4 @@
-use crate::TigerReadable;
+use crate::{error::Error, TigerReadable};
 
 #[derive(Debug, Clone)]
 pub struct NullString(pub String);
@@ -7,7 +7,7 @@ impl TigerReadable for NullString {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         _endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let mut buf = String::new();
 
         let mut b = [0u8; 1];
@@ -19,7 +19,7 @@ impl TigerReadable for NullString {
             buf.push(b[0] as char);
         }
 
-        Err(anyhow::anyhow!("NullString too long! (>1240)"))
+        Err(Error::StringTooLong)
     }
 
     const ZEROCOPY: bool = false;

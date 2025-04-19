@@ -4,7 +4,7 @@ impl<T: TigerReadable, const N: usize> TigerReadable for [T; N] {
     fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let data = if T::ZEROCOPY && endian == crate::Endian::Little {
             unsafe {
                 let mut data: Self = std::mem::zeroed();
@@ -36,7 +36,7 @@ mod tests {
     use std::io::Cursor;
 
     #[test]
-    fn test_array() -> anyhow::Result<()> {
+    fn test_array() -> crate::Result<()> {
         const DATA: &[u8] = &[
             2, 0, 0, 0, 239, 190, 173, 222, 0, 1, 2, 3, 4, 5, 6, 7, 1_0, 1_2, 1_3,
         ];

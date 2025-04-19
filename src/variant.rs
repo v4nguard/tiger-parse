@@ -1,15 +1,13 @@
 use std::io::SeekFrom;
 
-use anyhow::Context;
-
-use crate::TigerReadable;
+use crate::{error::Error, TigerReadable};
 
 pub trait VariantEnum: Sized {
     fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
         class: u32,
-    ) -> anyhow::Result<Self>;
+    ) -> crate::Result<Self>;
 }
 
 #[macro_export]
@@ -38,7 +36,7 @@ macro_rules! tiger_variant_enum {
                 reader: &mut R,
                 endian: tiger_parse::Endian,
                 class: u32,
-            ) -> anyhow::Result<Self> {
+            ) -> crate::Result<Self> {
                 use tiger_parse::TigerReadable;
                 paste::paste! {
                     $(
@@ -79,7 +77,7 @@ impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
         let offset: i64 = TigerReadable::read_ds_endian(reader, endian)?;
         if offset == 0 || offset == i64::MAX {
@@ -120,11 +118,9 @@ impl<T: VariantEnum + Sized> TigerReadable for VariantPointer<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
-    ) -> anyhow::Result<Self> {
+    ) -> crate::Result<Self> {
         let inner: OptionalVariantPointer<T> = TigerReadable::read_ds_endian(reader, endian)?;
-        Ok(Self(inner.0.context(
-            "Variant pointer is null (might be an OptionalVariantPointer)",
-        )?))
+        Ok(Self(inner.0.ok_or(Error::PointerNull)?))
     }
 
     const ID: Option<u32> = None;

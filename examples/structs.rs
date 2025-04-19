@@ -116,6 +116,12 @@ pub struct TagHash {
 #[tiger_tag]
 struct Test(i32, u32);
 
+#[tiger_tag]
+struct Test2(i32, u8, Substruct);
+
+#[tiger_tag]
+struct Substruct(u32);
+
 pub fn main() {
     let data = include_bytes!("testdata.bin");
     let mut cursor = Cursor::new(data);
@@ -131,4 +137,13 @@ pub fn main() {
     let test = Test::read_ds(&mut cursor).unwrap();
     assert_eq!(test.0, -2);
     assert_eq!(test.1, 123);
+
+    const TEST2: [u8; 8] = [0xfe, 0xff, 0xff, 0xff, 0x7b, 0x00, 0x00, 0x00];
+    let mut cursor = std::io::Cursor::new(&TEST2);
+
+    let Err(e) = Test2::read_ds(&mut cursor) else {
+        panic!("Unexpected success");
+    };
+
+    println!("Error: {e}");
 }

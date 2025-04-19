@@ -1,4 +1,9 @@
-pub use anyhow::Result;
+// Re-export to shorten typenames in struct backtraces
+pub use disqualified::ShortName;
+
+pub type Result<T> = std::result::Result<T, error::Error>;
+
+pub use error::{Error, ResultExt};
 pub use pointer::{Pointer, PointerOptional, ResourcePointer};
 
 #[cfg(feature = "tiger_pkg")]

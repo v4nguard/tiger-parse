@@ -109,17 +109,14 @@ pub fn tiger_tag(
         // Remove the tag attribute from the field
         f.attrs.retain(|v| !v.meta.path().is_ident("tag"));
 
-        // let fident = f.ident.clone();
-        // let fident = if struc.fields.is_tuple() {
-        //     Some(Ident::new(format!("f{}", i).as_str(), Span::call_site()))
-        // } else {
-        //     f.ident.clone()
-        // };
-        let fident = if let Some(fident) = f.ident.clone() {
-            fident
+        let (fident, display_ident) = if let Some(fident) = f.ident.clone() {
+            (fident.clone(), fident.to_string())
         } else {
             is_tuple = true;
-            Ident::new(format!("f{}", i).as_str(), Span::call_site())
+            (
+                Ident::new(format!("f{i}").as_str(), Span::call_site()),
+                format!("{i}"),
+            )
         };
 
         let ftype = f.ty.clone();
@@ -139,7 +136,7 @@ pub fn tiger_tag(
         }
 
         fieldstream.extend(quote! {
-            let #fident = <_>::read_ds_endian(reader, endian)?;
+            let #fident = <_>::read_ds_endian(reader, endian).with_field(&tiger_parse::ShortName::of::<Self>().to_string(), #display_ident)?;
         });
 
         if d.debug {
@@ -198,6 +195,7 @@ pub fn tiger_tag(
 
         impl ::tiger_parse::TigerReadable for #ident {
             fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
+                use tiger_parse::ResultExt;
                 let start_pos = reader.stream_position()?;
 
                 #fieldstream
