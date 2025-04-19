@@ -36,7 +36,7 @@ macro_rules! tiger_variant_enum {
                 reader: &mut R,
                 endian: tiger_parse::Endian,
                 class: u32,
-            ) -> crate::Result<Self> {
+            ) -> $crate::Result<Self> {
                 use tiger_parse::TigerReadable;
                 paste::paste! {
                     $(

@@ -30,6 +30,9 @@ pub enum Error {
     #[cfg(feature = "tiger_pkg")]
     #[error("Tag read failed: {0}")]
     TagReadFailed(String),
+
+    #[error("Enum variant {0} is out of range")]
+    EnumVariantOutOfRange(usize),
 }
 
 /// Represents a field in a propagated error, eg. `User.name`
