@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use tiger_parse::{Endian, Padding, TigerReadable};
+use tiger_parse::{tiger_variant_enum, Endian, Padding, TigerReadable};
 use tiger_parse_derive::tiger_tag;
 
 #[derive(Debug, Clone)]
@@ -121,6 +121,12 @@ struct Test2(i32, u8, Substruct);
 
 #[tiger_tag]
 struct Substruct(u32);
+
+tiger_variant_enum! {
+    [Unknown(true)]
+    enum MapNodeResource {
+    }
+}
 
 pub fn main() {
     let data = include_bytes!("testdata.bin");

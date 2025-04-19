@@ -23,6 +23,12 @@ pub enum Error {
     #[error("Pointer is null")]
     PointerNull,
 
+    #[error("Enum variant {0} is out of range")]
+    EnumVariantOutOfRange(usize),
+
+    #[error("Unknown variant class 0x{class:X} for variant enum {typename}")]
+    MissingVariantType { class: u32, typename: String },
+
     #[cfg(feature = "tiger_pkg")]
     #[error("Hash64 lookup failed for {0}")]
     Hash64LookupFailed(tiger_pkg::TagHash64),
@@ -30,9 +36,6 @@ pub enum Error {
     #[cfg(feature = "tiger_pkg")]
     #[error("Tag read failed: {0}")]
     TagReadFailed(String),
-
-    #[error("Enum variant {0} is out of range")]
-    EnumVariantOutOfRange(usize),
 }
 
 /// Represents a field in a propagated error, eg. `User.name`

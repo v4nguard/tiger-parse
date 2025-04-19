@@ -1,5 +1,8 @@
 // Re-export to shorten typenames in struct backtraces
+#[doc(hidden)]
 pub use disqualified::ShortName;
+#[doc(hidden)]
+pub use paste::paste;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
 

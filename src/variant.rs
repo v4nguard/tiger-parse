@@ -31,14 +31,14 @@ macro_rules! tiger_variant_enum {
         }
 
         #[allow(non_snake_case, non_upper_case_globals)]
-        impl VariantEnum for $enum_name {
+        impl $crate::VariantEnum for $enum_name {
             fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
                 reader: &mut R,
-                endian: tiger_parse::Endian,
+                endian: $crate::Endian,
                 class: u32,
             ) -> $crate::Result<Self> {
-                use tiger_parse::TigerReadable;
-                paste::paste! {
+                use $crate::TigerReadable;
+                $crate::paste! {
                     $(
                         const [<$variant _ID>] : u32 = $variant::ID.expect("Missing class ID");
                     )*
@@ -53,16 +53,14 @@ macro_rules! tiger_variant_enum {
                                     class,
                                     offset: reader.stream_position()?,
                                 })
-                                // let mut buffer = [0u8; 4];
-                                // reader.read_exact(&mut buffer)?;
-                                // anyhow::bail!("Unknown variant class 0x{:X} for variant enum {}", class, std::any::type_name::<Self>());
                             }
                         )*
                         #[allow(dead_code)]
-                        u => anyhow::bail!(
-                            "Unknown variant class 0x{u:X} for variant enum {}",
-                            std::any::type_name::<Self>()
-                        ),
+                        // u => anyhow::bail!(
+                        //     "Unknown variant class 0x{u:X} for variant enum {}",
+                        //     std::any::type_name::<Self>()
+                        // ),
+                        u => Err(tiger_parse::Error::MissingVariantType { class: u, typename: $crate::ShortName::of::<Self>().to_string() })
                     }
                 }
             }
