@@ -18,12 +18,12 @@ impl<T: TigerReadable> TigerReadable for Vec<T> {
 
         reader.seek(std::io::SeekFrom::Start(ptr))?;
         let size_header = Size::read_ds_endian(reader, endian)? as usize;
-        assert_eq!(
-            size,
-            size_header,
-            "Size mismatch in {}",
-            std::any::type_name::<Self>()
-        );
+        if size != size_header {
+            return Err(Error::InvalidStructure(format!(
+                "Vector size mismatch in {typename} at 0x{save_pos:X} (pointer 0x{ptr:X}). {size} elements in pointer vs {size_header} elements in header.",
+                typename = std::any::type_name::<Self>(),
+            )));
+        }
         #[cfg(feature = "check_types")]
         if T::ID.is_some() && (T::ID != Some(u32::MAX) || cfg!(feature = "check_types_strict")) {
             let element_type = u32::read_ds_endian(reader, endian)?;

@@ -29,6 +29,9 @@ pub enum Error {
     #[error("Unknown variant class 0x{class:X} for variant enum {typename}")]
     MissingVariantType { class: u32, typename: String },
 
+    #[error("Invalid structure: {0}")]
+    InvalidStructure(String),
+
     #[cfg(feature = "tiger_pkg")]
     #[error("Hash64 lookup failed for {0}")]
     Hash64LookupFailed(tiger_pkg::TagHash64),
