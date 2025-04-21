@@ -141,7 +141,7 @@ pub fn tiger_tag(
 
         if d.debug {
             fieldstream.extend(quote! {
-                    eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", std::any::type_name::<Self>(), stringify!(#fident), offset, #fident);
+                    eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", tiger_parse::ShortName::of::<Self>(), stringify!(#fident), offset, #fident);
                 });
         }
 
