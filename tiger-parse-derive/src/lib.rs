@@ -217,6 +217,7 @@ pub fn tiger_tag(
                 format!("{i}")
             };
 
+            let explicit_offset = d.field_offset.is_some();
             if let Some(field_offset) = d.field_offset {
                 struct_reflect_field_offset_stream = quote! {
                     (#field_offset as usize)
@@ -231,6 +232,7 @@ pub fn tiger_tag(
                     name: std::borrow::Cow::Borrowed(#fident),
                     size: <#ftype as ::tiger_parse::TigerReadable>::SIZE,
                     offset: #struct_reflect_field_offset_stream,
+                    explicit_offset: #explicit_offset,
                     ty: #type_reflect,
                 },
             });
@@ -247,6 +249,7 @@ pub fn tiger_tag(
             static #reflected_struct_ident: ::tiger_parse::reflect::ReflectedStruct = ::tiger_parse::reflect::ReflectedStruct {
                 id: #struct_id_or_zero,
                 name: std::borrow::Cow::Borrowed(stringify!(#ident)),
+                is_tuple: #is_tuple,
                 fields: std::borrow::Cow::Borrowed(&[
                     #struct_reflect_field_stream
                 ]),

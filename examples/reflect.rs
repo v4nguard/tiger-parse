@@ -111,10 +111,11 @@ mod structs {
 fn main() {
     let cc = ChromaConfig {
         inline_struct: chroma_dbg::InlineThreshold::MaxLength(256),
+        integer_format: chroma_dbg::IntegerFormat::HexWhenOver(8),
         ..Default::default()
     };
     for s in STRUCTS.iter() {
         println!("{}", cc.format(s));
-        // println!("{s}");
+        println!("{s}");
     }
 }
