@@ -2,6 +2,9 @@
 #[doc(hidden)]
 pub use disqualified::ShortName;
 #[doc(hidden)]
+#[cfg(feature = "reflect")]
+pub use linkme::distributed_slice;
+#[doc(hidden)]
 pub use paste::paste;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
@@ -25,6 +28,9 @@ mod padding;
 mod tuples;
 mod variant;
 mod vector;
+
+#[cfg(feature = "reflect")]
+pub mod reflect;
 
 pub mod error;
 pub mod pointer;

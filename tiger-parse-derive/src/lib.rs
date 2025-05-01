@@ -1,6 +1,6 @@
 use darling::{ast::NestedMeta, FromField, FromMeta};
 use proc_macro2::{self, Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 
 #[derive(Debug, Clone, Copy, Default, FromMeta)]
 #[darling(default)]
@@ -62,6 +62,7 @@ pub fn tiger_tag(
     let ident = struc.ident.clone();
 
     let struct_id = opts.struct_id;
+    let struct_id_or_zero = struct_id.unwrap_or(0);
     let impl_struct_id = if let Some(struct_id) = struct_id {
         quote! {
             const ID: Option<u32> = Some(#struct_id);
@@ -100,14 +101,13 @@ pub fn tiger_tag(
 
     let mut zerocopy_base_safety = true;
 
+    let mut last_offset = 0u64;
     let mut fieldstream = TokenStream::new();
     let mut fieldstream_assign = TokenStream::new();
     let mut uses_offsets = false;
     let mut is_tuple = false;
     for (i, f) in struc.fields.iter_mut().enumerate() {
         let d = OptsField::from_field(f).expect("Invalid field options");
-        // Remove the tag attribute from the field
-        f.attrs.retain(|v| !v.meta.path().is_ident("tag"));
 
         let (fident, display_ident) = if let Some(fident) = f.ident.clone() {
             (fident.clone(), fident.to_string())
@@ -121,11 +121,25 @@ pub fn tiger_tag(
 
         let ftype = f.ty.clone();
         if let Some(field_offset) = d.field_offset {
+            if field_offset >= last_offset {
+                last_offset = field_offset;
+            } else {
+                return quote! {
+                    compile_error!("Field offsets must be in ascending order");
+                }
+                .into();
+            }
+
             uses_offsets = true;
             zerocopy_base_safety = false;
             fieldstream.extend(quote! {
                 reader.seek(::std::io::SeekFrom::Start(start_pos+#field_offset))?;
             });
+
+            // Reset size field stream
+            fieldstream_size = quote! {
+                (#field_offset as usize)
+            };
         }
 
         if d.debug {
@@ -150,7 +164,7 @@ pub fn tiger_tag(
         });
 
         fieldstream_size.extend(quote! {
-            + <#ftype>::SIZE
+            + <#ftype as ::tiger_parse::TigerReadable>::SIZE
         });
 
         // Carry over the zerocopy flag from fields. All fields must be ZEROCOPY for the struct to be ZEROCOPY
@@ -188,6 +202,64 @@ pub fn tiger_tag(
         }
     };
 
+    let mut reflected_struct_stream = TokenStream::new();
+    if cfg!(feature = "reflect") {
+        let mut struct_reflect_field_stream = TokenStream::new();
+        let mut struct_reflect_field_offset_stream = TokenStream::new();
+        struct_reflect_field_offset_stream.extend(quote! {
+            0
+        });
+        for (i, f) in struc.fields.iter_mut().enumerate() {
+            let d = OptsField::from_field(f).expect("Invalid field options");
+            let fident = if let Some(fident) = f.ident.clone() {
+                fident.to_string()
+            } else {
+                format!("{i}")
+            };
+
+            if let Some(field_offset) = d.field_offset {
+                struct_reflect_field_offset_stream = quote! {
+                    (#field_offset as usize)
+                };
+            }
+
+            let ftype = f.ty.clone();
+            let type_reflect = type_to_reflect(&f.ty);
+
+            struct_reflect_field_stream.extend(quote! {
+                ::tiger_parse::reflect::ReflectedField {
+                    name: std::borrow::Cow::Borrowed(#fident),
+                    size: <#ftype as ::tiger_parse::TigerReadable>::SIZE,
+                    offset: #struct_reflect_field_offset_stream,
+                    ty: #type_reflect,
+                },
+            });
+
+            struct_reflect_field_offset_stream.extend(quote! {
+                + <#ftype as ::tiger_parse::TigerReadable>::SIZE
+            });
+        }
+
+        let reflected_struct_ident = format_ident!("_{}_REFLECT", ident);
+        reflected_struct_stream.extend(quote! {
+            #[allow(non_upper_case_globals)]
+            #[::tiger_parse::distributed_slice(crate::STRUCTS)]
+            static #reflected_struct_ident: ::tiger_parse::reflect::ReflectedStruct = ::tiger_parse::reflect::ReflectedStruct {
+                id: #struct_id_or_zero,
+                name: std::borrow::Cow::Borrowed(stringify!(#ident)),
+                fields: std::borrow::Cow::Borrowed(&[
+                    #struct_reflect_field_stream
+                ]),
+                size: <#ident as ::tiger_parse::TigerReadable>::SIZE,
+            };
+        });
+    }
+
+    // Strip the tag attribute from all fields
+    for f in struc.fields.iter_mut() {
+        f.attrs.retain(|v| !v.meta.path().is_ident("tag"));
+    }
+
     let item_stream = struc.to_token_stream();
     let output = quote! {
         #[repr(C)]
@@ -209,7 +281,74 @@ pub fn tiger_tag(
             #impl_struct_type
             #impl_struct_size
         }
+
+        #reflected_struct_stream
+
+        // If a custom size is specific, it must be at least the total sum of the field type sizes
+        const _: () = {
+            assert!(<#ident as ::tiger_parse::TigerReadable>::SIZE >= (#fieldstream_size), "Declared struct size must be less than or equal to the total sum of the field type sizes");
+        };
     };
 
     output.into()
+}
+
+fn type_to_reflect(ty: &syn::Type) -> TokenStream {
+    let t = match ty {
+        syn::Type::Array(type_array) => {
+            let len = type_array.len.clone();
+            let element_type = type_to_reflect(&type_array.elem);
+            quote! {
+                FixedArray(#len, ::tiger_parse::reflect::CowBox::Borrowed(&#element_type))
+            }
+        }
+        syn::Type::Path(type_path) => {
+            let last_segment = type_path.path.segments.last().unwrap();
+            match last_segment.ident.to_string().as_str() {
+                "u8" => quote!(UInt8),
+                "u16" => quote!(UInt16),
+                "u32" => quote!(UInt32),
+                "u64" => quote!(UInt64),
+                "i8" => quote!(Int8),
+                "i16" => quote!(Int16),
+                "i32" => quote!(Int32),
+                "i64" => quote!(Int64),
+                "f32" => quote!(Float32),
+                "f64" => quote!(Float64),
+                "Vec2" => quote!(Vec2),
+                "Vec3" => quote!(Vec3),
+                "Vec4" => quote!(Vec4),
+                "TagHash" => quote!(TagHash),
+                "Vec" => {
+                    let syn::PathArguments::AngleBracketed(path_args) =
+                        last_segment.arguments.clone()
+                    else {
+                        unreachable!("Expected angle bracketed arguments for Vec type");
+                    };
+
+                    let syn::GenericArgument::Type(inner_ty) = &path_args.args[0] else {
+                        unreachable!("Expected type argument for Vec type");
+                    };
+
+                    let inner_ty_reflected = type_to_reflect(&inner_ty);
+
+                    quote!(Array(::tiger_parse::reflect::CowBox::Borrowed(&#inner_ty_reflected)))
+                }
+                s => quote!(Other(std::borrow::Cow::Borrowed(#s))),
+            }
+        }
+        syn::Type::Tuple(type_tuple) => {
+            let mut fields = TokenStream::new();
+            for field in &type_tuple.elems {
+                let field_reflected = type_to_reflect(field);
+                fields.extend(quote!(#field_reflected, ));
+            }
+            quote!(Tuple(std::borrow::Cow::Borrowed(&[#fields])))
+        }
+        _ => {
+            quote!(Other(std::borrow::Cow::Borrowed(stringify!(#ty))))
+        }
+    };
+
+    quote!(::tiger_parse::reflect::ReflectedType::#t)
 }

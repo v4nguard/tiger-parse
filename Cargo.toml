@@ -1,6 +1,6 @@
 [package]
 name = "tiger-parse"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,6 +13,8 @@ tiger-parse-derive = { path = "./tiger-parse-derive" }
 thiserror = "1"
 disqualified = "1.0.0"
 paste = "1.0.15"
+linkme = { version = "0.3.0", optional = true }
+
 
 [features]
 default = ["check_types"]
@@ -23,3 +25,7 @@ check_types = []
 check_types_strict = []
 tiger_pkg = ["dep:tiger-pkg"]
 check_types_debug = ["dep:tracing"]
+reflect = ["dep:linkme", "tiger-parse-derive/reflect"]
+
+[dev-dependencies]
+chroma-dbg = "0.1.1"
