@@ -106,6 +106,14 @@ mod structs {
         /// This can be used to differentiate stationary static geometry from moving/animated statics
         pub unk6: u8,
     }
+
+    #[derive(Debug, Clone)]
+    #[tiger_tag(id = 0x80808080, size = 0x10)]
+    pub struct Test {
+        pub unk0: u32,
+        pub unk1: u32,
+        pub unk2: u32,
+    }
 }
 
 fn main() {

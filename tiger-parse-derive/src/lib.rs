@@ -289,7 +289,7 @@ pub fn tiger_tag(
 
         // If a custom size is specific, it must be at least the total sum of the field type sizes
         const _: () = {
-            assert!(<#ident as ::tiger_parse::TigerReadable>::SIZE >= (#fieldstream_size), "Declared struct size must be less than or equal to the total sum of the field type sizes");
+            assert!(<#ident as ::tiger_parse::TigerReadable>::SIZE >= (#fieldstream_size), "Declared struct size must be greater than or equal to the total sum of the field type sizes");
         };
     };
 
