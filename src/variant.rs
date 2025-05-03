@@ -109,6 +109,12 @@ impl<T: VariantEnum + Sized> std::ops::Deref for OptionalVariantPointer<T> {
     }
 }
 
+impl<T: VariantEnum + Sized + Clone> Clone for OptionalVariantPointer<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 #[derive(Debug)]
 pub struct VariantPointer<T: VariantEnum + Sized>(T);
 
@@ -131,5 +137,11 @@ impl<T: VariantEnum + Sized> std::ops::Deref for VariantPointer<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<T: VariantEnum + Sized + Clone> Clone for VariantPointer<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
     }
 }
