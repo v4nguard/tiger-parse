@@ -275,6 +275,10 @@ pub fn tiger_tag(
 
                 #fieldstream
 
+                if <#ident as ::tiger_parse::TigerReadable>::SIZE != (#fieldstream_size) {
+                    reader.seek(::std::io::SeekFrom::Start(start_pos + <#ident as ::tiger_parse::TigerReadable>::SIZE as u64))?;
+                }
+
                 Ok(#return_statement)
             }
 

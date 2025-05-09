@@ -155,5 +155,5 @@ pub fn main() {
         panic!("Unexpected success");
     };
 
-    println!("Error: {e}");
+    println!("Error (this is expected): {e}");
 }
