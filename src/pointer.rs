@@ -192,7 +192,7 @@ impl TigerReadable for ResourcePointerWithClass {
         let offset_save = reader.stream_position()?;
 
         reader.seek(SeekFrom::Start(offset_base))?;
-        reader.seek(SeekFrom::Current(offset - 4))?;
+        reader.seek(SeekFrom::Current(offset as i64 - 4))?;
         let resource_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
         let parent_tag: tiger_pkg::TagHash = TigerReadable::read_ds_endian(reader, endian)?;
         let class_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;

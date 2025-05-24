@@ -136,3 +136,14 @@ impl TigerReadable for bool {
     const ZEROCOPY: bool = true;
     const SIZE: usize = 1;
 }
+
+impl<T> TigerReadable for Box<T>
+where
+    T: TigerReadable,
+{
+    fn read_ds_endian<R: Read + Seek>(reader: &mut R, endian: Endian) -> Result<Self> {
+        Ok(Box::new(T::read_ds_endian(reader, endian)?))
+    }
+
+    const SIZE: usize = T::SIZE;
+}
