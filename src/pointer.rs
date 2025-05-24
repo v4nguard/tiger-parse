@@ -6,23 +6,23 @@ use std::{
 
 use crate::{Offset, TigerReadable};
 
-pub struct Pointer<T: TigerReadable>(pub T, u64);
+pub struct Pointer<T: TigerReadable>(pub T, Offset);
 
 impl<T: TigerReadable> TigerReadable for Pointer<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
     ) -> crate::Result<Self> {
-        let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
+        let ptr = reader.stream_position()? as i64 + Offset::read_ds_endian(reader, endian)? as i64;
         let save_pos = reader.stream_position()?;
 
-        reader.seek(std::io::SeekFrom::Start(ptr))?;
+        reader.seek(std::io::SeekFrom::Start(ptr as u64))?;
 
         let data = T::read_ds_endian(reader, endian)?;
 
         reader.seek(std::io::SeekFrom::Start(save_pos))?;
 
-        Ok(Pointer(data, ptr))
+        Ok(Pointer(data, ptr as Offset))
     }
 
     const ZEROCOPY: bool = false;
@@ -32,7 +32,7 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
 }
 
 impl<T: TigerReadable> Pointer<T> {
-    pub fn offset(&self) -> u64 {
+    pub fn offset(&self) -> Offset {
         self.1
     }
 }
@@ -57,29 +57,29 @@ impl<T: TigerReadable + Clone> Clone for Pointer<T> {
     }
 }
 
-pub struct PointerOptional<T: TigerReadable>(pub Option<T>, u64);
+pub struct PointerOptional<T: TigerReadable>(pub Option<T>, Offset);
 
 impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
     ) -> crate::Result<Self> {
-        let ptr_pos = reader.stream_position()?;
+        let ptr_pos = reader.stream_position()? as i64;
         let ptr_data = Offset::read_ds_endian(reader, endian)?;
         if ptr_data == 0 {
-            return Ok(PointerOptional(None, ptr_pos));
+            return Ok(PointerOptional(None, ptr_pos as Offset));
         }
 
-        let ptr = ptr_pos + u64::from(ptr_data);
+        let ptr = ptr_pos + ptr_data as i64;
         let save_pos = reader.stream_position()?;
 
-        reader.seek(std::io::SeekFrom::Start(ptr))?;
+        reader.seek(std::io::SeekFrom::Start(ptr as u64))?;
 
         let data = T::read_ds_endian(reader, endian)?;
 
         reader.seek(std::io::SeekFrom::Start(save_pos))?;
 
-        Ok(PointerOptional(Some(data), ptr_pos))
+        Ok(PointerOptional(Some(data), ptr_pos as Offset))
     }
 
     const ZEROCOPY: bool = false;
@@ -89,7 +89,7 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
 }
 
 impl<T: TigerReadable> PointerOptional<T> {
-    pub fn offset(&self) -> Option<u64> {
+    pub fn offset(&self) -> Option<Offset> {
         self.0.as_ref().map(|_| self.1)
     }
 }
@@ -121,8 +121,8 @@ impl TigerReadable for ResourcePointer {
         endian: crate::Endian,
     ) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
-        let offset: i64 = TigerReadable::read_ds_endian(reader, endian)?;
-        if offset == 0 || offset == i64::MAX {
+        let offset: Offset = TigerReadable::read_ds_endian(reader, endian)?;
+        if offset == 0 || offset == Offset::MAX {
             return Ok(ResourcePointer {
                 offset: 0,
                 resource_type: u32::MAX,
@@ -133,13 +133,13 @@ impl TigerReadable for ResourcePointer {
         let offset_save = reader.stream_position()?;
 
         reader.seek(SeekFrom::Start(offset_base))?;
-        reader.seek(SeekFrom::Current(offset - 4))?;
+        reader.seek(SeekFrom::Current(offset as i64 - 4))?;
         let resource_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
 
         reader.seek(SeekFrom::Start(offset_save))?;
 
         Ok(ResourcePointer {
-            offset: offset_base.saturating_add_signed(offset),
+            offset: offset_base.saturating_add_signed(offset as i64),
             resource_type,
             is_valid: true,
         })
@@ -178,8 +178,8 @@ impl TigerReadable for ResourcePointerWithClass {
         endian: crate::Endian,
     ) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
-        let offset: i64 = TigerReadable::read_ds_endian(reader, endian)?;
-        if offset == 0 || offset == i64::MAX {
+        let offset: Offset = TigerReadable::read_ds_endian(reader, endian)?;
+        if offset == 0 || offset == Offset::MAX {
             return Ok(ResourcePointerWithClass {
                 offset: 0,
                 is_valid: false,
@@ -228,7 +228,7 @@ impl Debug for ResourcePointerWithClass {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
+    use std::io::{Cursor, Seek};
 
     use crate::{Pointer, TigerReadable};
 
@@ -249,6 +249,23 @@ mod tests {
         ];
 
         let mut cursor = Cursor::new(&data);
+        let ptr: Pointer<u64> =
+            TigerReadable::read_ds_endian(&mut cursor, crate::Endian::Little).unwrap();
+
+        println!("{:X}", *ptr);
+        assert_eq!(*ptr, 0xfeed_da_beef)
+    }
+
+    #[test]
+    fn test_backwards_pointer() {
+        let data: [u8; 0x28] = [
+            0xef, 0xbe, 0xda, 0xed, 0xfe, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        ];
+
+        let mut cursor = Cursor::new(&data);
+        cursor.seek(std::io::SeekFrom::Start(0x20)).unwrap();
         let ptr: Pointer<u64> =
             TigerReadable::read_ds_endian(&mut cursor, crate::Endian::Little).unwrap();
 

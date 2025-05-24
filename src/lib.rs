@@ -45,16 +45,16 @@ pub use dpkg::PackageManagerExt;
 use std::io::{Read, Seek};
 
 #[cfg(feature = "32bit")]
-type Offset = u32;
+type Offset = i32;
 
 #[cfg(feature = "32bit")]
-type Size = u32;
+type Size = i32;
 
 #[cfg(not(feature = "32bit"))]
-type Offset = u64;
+type Offset = i64;
 
 #[cfg(not(feature = "32bit"))]
-type Size = u64;
+type Size = i64;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Endian {

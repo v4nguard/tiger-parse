@@ -1,6 +1,6 @@
 use std::io::SeekFrom;
 
-use crate::{error::Error, TigerReadable};
+use crate::{error::Error, Offset, TigerReadable};
 
 pub trait VariantEnum: Sized {
     fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
@@ -77,18 +77,18 @@ impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
         endian: crate::Endian,
     ) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
-        let offset: i64 = TigerReadable::read_ds_endian(reader, endian)?;
-        if offset == 0 || offset == i64::MAX {
+        let offset: Offset = TigerReadable::read_ds_endian(reader, endian)?;
+        if offset == 0 || offset == Offset::MAX {
             return Ok(Self(None));
         }
 
         let offset_save = reader.stream_position()?;
 
         reader.seek(SeekFrom::Start(offset_base))?;
-        reader.seek(SeekFrom::Current(offset - 4))?;
+        reader.seek(SeekFrom::Current(offset as i64 - 4))?;
         let resource_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
         reader.seek(SeekFrom::Start(offset_base))?;
-        reader.seek(SeekFrom::Current(offset + 0x10))?;
+        reader.seek(SeekFrom::Current(offset as i64 + 0x10))?;
         let data = T::read_variant_endian(reader, endian, resource_type)?;
 
         reader.seek(SeekFrom::Start(offset_save))?;
