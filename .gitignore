@@ -1,1 +1,5 @@
 target/
+target_ra/
+
+# Cargo.lock gets ignored when using the crate as a dependency
+Cargo.lock

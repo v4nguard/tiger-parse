@@ -1,20 +1,18 @@
 [package]
 name = "tiger-parse"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+disqualified = "1"
+glam = { version = "0" }
+paste = "1"
+thiserror = "1"
+tiger-parse-derive = { path = "./tiger-parse-derive" }
+
+linkme = { version = "0.3", optional = true }
 tiger-pkg = { version = "0.18", optional = true }
 tracing = { version = "0.1", optional = true }
-glam = { version = ">0.29.0" }
-tiger-parse-derive = { path = "./tiger-parse-derive" }
-thiserror = "1"
-disqualified = "1.0.0"
-paste = "1.0.15"
-linkme = { version = "0.3.0", optional = true }
-
 
 [features]
 default = ["check_types"]
