@@ -34,7 +34,7 @@ macro_rules! tiger_variant_enum {
             pub fn class_id(&self) -> u32 {
                 match self {
                     $(
-                        Self::$variant(_) => $variant::ID.expect("Missing class ID"),
+                        Self::$variant(_) => <$variant as $crate::TigerReadable>::ID.expect("Missing class ID"),
                     )*
                     $(
                         Self::Unknown { class, .. } => if $enable_unknown { *class } else { unreachable!() },
@@ -73,7 +73,7 @@ macro_rules! tiger_variant_enum {
                         //     "Unknown variant class 0x{u:X} for variant enum {}",
                         //     std::any::type_name::<Self>()
                         // ),
-                        u => Err(tiger_parse::Error::MissingVariantType { class: u, typename: $crate::ShortName::of::<Self>().to_string() })
+                        u => Err($crate::Error::MissingVariantType { class: u, typename: $crate::ShortName::of::<Self>().to_string() })
                     }
                 }
             }
