@@ -30,6 +30,19 @@ macro_rules! tiger_variant_enum {
             )*
         }
 
+        impl $enum_name {
+            pub fn class_id(&self) -> u32 {
+                match self {
+                    $(
+                        Self::$variant(_) => $variant::ID.expect("Missing class ID"),
+                    )*
+                    $(
+                        Self::Unknown { class, .. } => if $enable_unknown { *class } else { unreachable!() },
+                    )*
+                }
+            }
+        }
+
         #[allow(non_snake_case, non_upper_case_globals)]
         impl $crate::VariantEnum for $enum_name {
             fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
