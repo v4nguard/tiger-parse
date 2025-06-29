@@ -41,6 +41,17 @@ macro_rules! tiger_variant_enum {
                     )*
                 }
             }
+
+            pub fn class_name(&self) -> &'static str {
+                match self {
+                    $(
+                        Self::$variant(_) => $crate::ShortName::of::<$variant>().0,
+                    )*
+                    $(
+                        Self::Unknown { .. } => if $enable_unknown { "Unknown" } else { unreachable!() },
+                    )*
+                }
+            }
         }
 
         #[allow(non_snake_case, non_upper_case_globals)]
