@@ -3,6 +3,8 @@ use std::io::SeekFrom;
 use crate::{error::Error, Offset, TigerReadable};
 
 pub trait VariantEnum: Sized {
+    const EXTRA_OFFSET: i64 = 0;
+
     fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
         endian: crate::Endian,
@@ -12,7 +14,14 @@ pub trait VariantEnum: Sized {
 
 #[macro_export]
 macro_rules! tiger_variant_enum {
-    ($(#[derive($($derive:ident),+)])? $([Unknown($enable_unknown:expr)])? enum $enum_name:ident { $($variant:ident),* }) => {
+    (
+        $(#[derive($($derive:ident),+)])?
+        $([offset = $offset:expr])?
+        $([Unknown($enable_unknown:expr)])?
+        enum $enum_name:ident {
+            $($variant:ident),*
+        }
+    ) => {
         $(
             #[derive($($derive),*)]
         )?
@@ -56,6 +65,9 @@ macro_rules! tiger_variant_enum {
 
         #[allow(non_snake_case, non_upper_case_globals)]
         impl $crate::VariantEnum for $enum_name {
+            $(
+                const EXTRA_OFFSET: i64 = $offset;
+            )*
             fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
                 reader: &mut R,
                 endian: $crate::Endian,
@@ -112,7 +124,7 @@ impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
         reader.seek(SeekFrom::Current(offset as i64 - 4))?;
         let resource_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
         reader.seek(SeekFrom::Start(offset_base))?;
-        reader.seek(SeekFrom::Current(offset as i64 + 0x10))?;
+        reader.seek(SeekFrom::Current(offset + T::EXTRA_OFFSET))?;
         let data = T::read_variant_endian(reader, endian, resource_type)?;
 
         reader.seek(SeekFrom::Start(offset_save))?;
