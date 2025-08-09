@@ -47,7 +47,10 @@ impl<T: TigerReadable> Deref for Pointer<T> {
 
 impl<T: TigerReadable + Debug> Debug for Pointer<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        f.debug_tuple("Pointer")
+            .field(&self.0)
+            .field(&self.1)
+            .finish()
     }
 }
 
@@ -104,7 +107,10 @@ impl<T: TigerReadable> Deref for PointerOptional<T> {
 
 impl<T: TigerReadable + Debug> Debug for PointerOptional<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        f.debug_tuple("PointerOptional")
+            .field(&self.0)
+            .field(&self.1)
+            .finish()
     }
 }
 
