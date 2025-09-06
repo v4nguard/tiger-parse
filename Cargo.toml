@@ -2,6 +2,7 @@
 name = "tiger-parse"
 version = "0.6.0"
 edition = "2021"
+license = "MIT"
 
 [dependencies]
 disqualified = "1"
