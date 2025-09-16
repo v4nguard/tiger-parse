@@ -32,11 +32,9 @@ pub enum Error {
     #[error("Invalid structure: {0}")]
     InvalidStructure(String),
 
-    #[cfg(feature = "tiger_pkg")]
     #[error("Hash64 lookup failed for {0}")]
     Hash64LookupFailed(tiger_pkg::TagHash64),
 
-    #[cfg(feature = "tiger_pkg")]
     #[error("Tag read failed: {0}")]
     TagReadFailed(String),
 }

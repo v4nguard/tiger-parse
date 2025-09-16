@@ -42,6 +42,12 @@ struct OptsField {
     #[darling(rename = "ftype")]
     field_type: FieldType,
 
+    #[darling(rename = "if")]
+    condition: Option<String>,
+
+    #[darling(rename = "default")]
+    default: Option<String>,
+
     debug: bool,
 }
 
@@ -149,20 +155,43 @@ pub fn tiger_tag(
             });
         }
 
-        fieldstream.extend(quote! {
-            let #fident = <_>::read_ds_endian(reader, endian).with_field(&tiger_parse::ShortName::of::<Self>().to_string(), #display_ident)?;
-        });
+        if let Some(condition) = d.condition {
+            let condition: proc_macro2::TokenStream =
+                condition.parse().expect("Invalid condition syntax");
+
+            if let Some(ftype_inner) = get_option_inner(&ftype) {
+                fieldstream.extend(quote! {
+                    let #fident = if #condition { Some(<#ftype_inner>::read_ds_endian(reader, endian).with_field(&tiger_parse::ShortName::of::<Self>().to_string(), #display_ident)?) } else { None };
+                });
+            } else {
+                let default = if let Some(default) = d.default {
+                    let default: proc_macro2::TokenStream =
+                        default.parse().expect("Invalid default syntax");
+                    quote! { #default }
+                } else {
+                    quote! { Default::default() }
+                };
+                fieldstream.extend(quote! {
+                    let #fident = if #condition { <_>::read_ds_endian(reader, endian).with_field(&tiger_parse::ShortName::of::<Self>().to_string(), #display_ident)? } else { #default };
+                });
+            }
+        } else {
+            fieldstream.extend(quote! {
+                let #fident = <_>::read_ds_endian(reader, endian).with_field(&tiger_parse::ShortName::of::<Self>().to_string(), #display_ident)?;
+            });
+        }
 
         if d.debug {
             fieldstream.extend(quote! {
-                    eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", tiger_parse::ShortName::of::<Self>(), stringify!(#fident), offset, #fident);
-                });
+                eprintln!("[{}.{} @ 0x{:X}]: {:#X?}", tiger_parse::ShortName::of::<Self>(), stringify!(#fident), offset, #fident);
+            });
         }
 
         fieldstream_assign.extend(quote! {
             #fident,
         });
 
+        let ftype = option_inner_or_self(&f.ty);
         fieldstream_size.extend(quote! {
             + <#ftype as ::tiger_parse::TigerReadable>::SIZE
         });
@@ -224,7 +253,7 @@ pub fn tiger_tag(
                 };
             }
 
-            let ftype = f.ty.clone();
+            let ftype = option_inner_or_self(&f.ty);
             let type_reflect = type_to_reflect(&f.ty);
 
             struct_reflect_field_stream.extend(quote! {
@@ -271,6 +300,8 @@ pub fn tiger_tag(
         impl ::tiger_parse::TigerReadable for #ident {
             fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
                 use tiger_parse::ResultExt;
+                use tiger_pkg::DestinyVersion;
+                let version = DestinyVersion::Destiny2TheEdgeOfFate;
                 let start_pos = reader.stream_position()?;
 
                 #fieldstream
@@ -298,6 +329,25 @@ pub fn tiger_tag(
     };
 
     output.into()
+}
+
+fn get_option_inner(ty: &syn::Type) -> Option<&syn::Type> {
+    if let syn::Type::Path(type_path) = ty {
+        let last_segment = type_path.path.segments.last().unwrap();
+        if last_segment.ident == "Option" {
+            if let syn::PathArguments::AngleBracketed(path_args) = &last_segment.arguments {
+                if let syn::GenericArgument::Type(inner_ty) = &path_args.args[0] {
+                    return Some(inner_ty);
+                }
+            }
+        }
+    }
+
+    None
+}
+
+fn option_inner_or_self(ty: &syn::Type) -> &syn::Type {
+    get_option_inner(ty).unwrap_or(ty)
 }
 
 fn type_to_reflect(ty: &syn::Type) -> TokenStream {

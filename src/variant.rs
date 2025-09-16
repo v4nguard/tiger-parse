@@ -124,7 +124,7 @@ impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
         reader.seek(SeekFrom::Current(offset as i64 - 4))?;
         let resource_type: u32 = TigerReadable::read_ds_endian(reader, endian)?;
         reader.seek(SeekFrom::Start(offset_base))?;
-        reader.seek(SeekFrom::Current(offset + T::EXTRA_OFFSET))?;
+        reader.seek(SeekFrom::Current(offset as i64 + T::EXTRA_OFFSET))?;
         let data = T::read_variant_endian(reader, endian, resource_type)?;
 
         reader.seek(SeekFrom::Start(offset_save))?;

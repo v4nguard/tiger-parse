@@ -11,7 +11,7 @@ thiserror = "1"
 tiger-parse-derive = { path = "./tiger-parse-derive" }
 
 linkme = { version = "0.3", optional = true }
-tiger-pkg = { version = "0.18", optional = true }
+tiger-pkg = { version = "0.18", optional = false }
 tracing = { version = "0.1", optional = true }
 
 [features]
@@ -21,7 +21,7 @@ default = ["check_types"]
 check_types = []
 # Check types in strict mode. 0xFFFFFFFF are not allowed in strict mode.
 check_types_strict = []
-tiger_pkg = ["dep:tiger-pkg"]
+# tiger_pkg = ["dep:tiger-pkg"]
 check_types_debug = ["dep:tracing"]
 reflect = ["dep:linkme", "tiger-parse-derive/reflect"]
 

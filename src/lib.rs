@@ -12,7 +12,6 @@ pub type Result<T> = std::result::Result<T, error::Error>;
 pub use error::{Error, ResultExt};
 pub use pointer::{Pointer, PointerOptional, ResourcePointer};
 
-#[cfg(feature = "tiger_pkg")]
 pub use pointer::ResourcePointerWithClass;
 
 pub use padding::Padding;
@@ -36,10 +35,7 @@ pub mod error;
 pub mod pointer;
 pub mod string;
 
-#[cfg(feature = "tiger_pkg")]
 pub mod dpkg;
-
-#[cfg(feature = "tiger_pkg")]
 pub use dpkg::PackageManagerExt;
 
 use std::io::{Read, Seek};
@@ -70,9 +66,15 @@ pub trait TigerReadable: Sized {
 
     fn read_ds_endian<R: Read + Seek>(reader: &mut R, endian: Endian) -> Result<Self>;
 
+    fn class_id(version: impl Into<Option<u32>>) -> Option<u32> {
+        _ = version;
+        None
+    }
+
     const ZEROCOPY: bool = false;
 
     /// 0x8080XXXX structure ID
+    #[deprecated(note = "Use class_id(None) instead")]
     const ID: Option<u32> = None;
 
     const ETYPE: Option<(u8, Option<u8>)> = None;

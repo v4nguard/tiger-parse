@@ -171,7 +171,6 @@ impl Debug for ResourcePointer {
     }
 }
 
-#[cfg(feature = "tiger_pkg")]
 #[derive(Clone, Copy)]
 pub struct ResourcePointerWithClass {
     pub offset: u64,
@@ -183,7 +182,6 @@ pub struct ResourcePointerWithClass {
     pub class_type: u32,
 }
 
-#[cfg(feature = "tiger_pkg")]
 impl TigerReadable for ResourcePointerWithClass {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
         reader: &mut R,
@@ -226,7 +224,6 @@ impl TigerReadable for ResourcePointerWithClass {
     const SIZE: usize = 8;
 }
 
-#[cfg(feature = "tiger_pkg")]
 impl Debug for ResourcePointerWithClass {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
