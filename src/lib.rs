@@ -17,7 +17,7 @@ pub use pointer::ResourcePointerWithClass;
 
 pub use padding::Padding;
 pub use string::NullString;
-pub use tiger_parse_derive::tiger_tag;
+pub use tiger_parse_derive::tiger_type;
 pub use variant::{OptionalVariantPointer, VariantEnum, VariantPointer};
 
 pub type FnvHash = u32;

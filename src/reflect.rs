@@ -15,7 +15,7 @@ pub struct ReflectedStruct {
 impl std::fmt::Display for ReflectedStruct {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
-            "#[tiger_tag(id = 0x{:08X}, size = 0x{:X})]\n",
+            "#[tiger_type(id = 0x{:08X}, size = 0x{:X})]\n",
             self.id, self.size
         ))?;
         f.write_fmt(format_args!("struct {} {{", self.name))?;
@@ -41,7 +41,7 @@ pub struct ReflectedField {
 impl std::fmt::Display for ReflectedField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.explicit_offset {
-            f.write_fmt(format_args!("#[tag(offset = 0x{:X})] ", self.offset))?;
+            f.write_fmt(format_args!("#[tiger(offset = 0x{:X})] ", self.offset))?;
         }
         f.write_fmt(format_args!("{}: {}", self.name, self.ty))
     }

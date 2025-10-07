@@ -37,7 +37,7 @@ struct Opts {
 }
 
 #[derive(FromField, Default, Debug)]
-#[darling(default, attributes(tag), forward_attrs(allow, doc, cfg))]
+#[darling(default, attributes(tiger), forward_attrs(allow, doc, cfg))]
 struct OptsField {
     #[darling(rename = "offset")]
     field_offset: Option<u64>,
@@ -285,9 +285,9 @@ fn generate_struct(
         });
     }
 
-    // Strip the tag attribute from all fields
+    // Strip the tiger attribute from all fields
     for f in struc.fields.iter_mut() {
-        f.attrs.retain(|v| !v.meta.path().is_ident("tag"));
+        f.attrs.retain(|v| !v.meta.path().is_ident("tiger"));
     }
 
     let item_stream = struc.to_token_stream();

@@ -5,11 +5,11 @@ mod structs {
     use tiger_parse::tiger_tag;
 
     #[derive(Debug, Clone)]
-    #[tiger_tag]
+    #[tiger_type]
     pub struct TagHash(u32);
 
     #[derive(Debug, Clone)]
-    #[tiger_tag(id = 0x808087D1)]
+    #[tiger_type(id = 0x808087D1)]
     pub struct SDynamicMeshPart {
         pub technique: TagHash,
         pub variant_shader_index: u16,
@@ -39,7 +39,7 @@ mod structs {
     }
 
     #[derive(Debug, Clone)]
-    #[tiger_tag(id = 0x808087CB, size = 0x88)]
+    #[tiger_type(id = 0x808087CB, size = 0x88)]
     pub struct SDynamicMesh {
         pub vertex0_buffer: TagHash,
         pub vertex1_buffer: TagHash,
@@ -60,7 +60,7 @@ mod structs {
     }
 
     #[derive(Debug)]
-    #[tiger_tag(id = 0x80808620, size = 0x60)]
+    #[tiger_type(id = 0x80808620, size = 0x60)]
     pub struct SStaticMeshData {
         pub file_size: u64,
         pub mesh_groups: Vec<SStaticMeshGroup>,
@@ -68,7 +68,7 @@ mod structs {
         pub buffers: Vec<(TagHash, TagHash, TagHash, TagHash)>,
         pub unk38: u32,
 
-        #[tag(offset = 0x40)]
+        #[tiger(offset = 0x40)]
         pub mesh_offset: glam::Vec3,
         pub mesh_scale: f32,
         pub texture_coordinate_scale: f32,
@@ -77,7 +77,7 @@ mod structs {
     }
 
     #[derive(Debug, Clone)]
-    #[tiger_tag(id = 0x80808627)]
+    #[tiger_type(id = 0x80808627)]
     pub struct SStaticMeshPart {
         pub index_start: u32,
         pub index_count: u32,
@@ -88,7 +88,7 @@ mod structs {
     }
 
     #[derive(Debug, Clone)]
-    #[tiger_tag(id = 0x80808628)]
+    #[tiger_type(id = 0x80808628)]
     pub struct SStaticMeshGroup {
         pub part_index: u16,
         pub render_stage: u8,
@@ -101,7 +101,7 @@ mod structs {
     }
 
     #[derive(Debug, Clone)]
-    #[tiger_tag(id = 0x80808080, size = 0x10)]
+    #[tiger_type(id = 0x80808080, size = 0x10)]
     pub struct Test {
         pub unk0: u32,
         pub unk1: u32,

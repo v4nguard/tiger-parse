@@ -1,17 +1,16 @@
 use std::io::Cursor;
 
-use tiger_parse::{tiger_variant_enum, Endian, Padding, TigerReadable};
-use tiger_parse_derive::tiger_tag;
+use tiger_parse::{tiger_type, tiger_variant_enum, Endian, Padding, TigerReadable};
 
 tiger_parse::reflection_container!();
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0x80806D44)]
+#[tiger_type(id = 0x80806D44)]
 pub struct SStaticMesh {
     pub file_size: u64,
     pub unk8: TagHash,
     pub _pad: Padding<4>,
-    #[tag(debug)]
+    #[tiger(debug)]
     pub materials: Vec<TagHash>,
     pub unk20: Vec<Box<SStaticMeshOverlay>>, // Overlay/transparent meshes
     pub unk30: [u32; 2],
@@ -21,14 +20,14 @@ pub struct SStaticMesh {
 }
 
 #[derive(Debug)]
-#[tiger_tag(id = 0x80806D30, size = 0x60)]
+#[tiger_type(id = 0x80806D30, size = 0x60)]
 pub struct SStaticMeshData {
     pub file_size: u64,
     pub mesh_groups: Vec<Unk8080719b>,
     pub parts: Vec<Unk8080719a>,
     pub buffers: Vec<(TagHash, TagHash, TagHash, TagHash)>,
 
-    #[tag(offset = 0x40)]
+    #[tiger(offset = 0x40)]
     pub mesh_offset: glam::Vec3,
     pub mesh_scale: f32,
     pub texture_coordinate_scale: f32,
@@ -36,7 +35,7 @@ pub struct SStaticMeshData {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF)]
+#[tiger_type(id = 0xFFFFFFFF)]
 pub struct Unk8080719a {
     pub index_start: u32,
     pub index_count: u32,
@@ -47,7 +46,7 @@ pub struct Unk8080719a {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF)]
+#[tiger_type(id = 0xFFFFFFFF)]
 pub struct Unk8080719b {
     pub part_index: u16,
     pub unk2: u8,
@@ -56,12 +55,12 @@ pub struct Unk8080719b {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF, size = 0x98)]
+#[tiger_type(id = 0xFFFFFFFF, size = 0x98)]
 pub struct SStaticMeshInstances {
-    #[tag(offset = 0x18)]
+    #[tiger(offset = 0x18)]
     pub occlusion_bounds: TagHash,
 
-    #[tag(offset = 0x40)]
+    #[tiger(offset = 0x40)]
     pub transforms: Vec<Unk808071a3>,
     pub unk50: u64,
     pub unk58: [u64; 4],
@@ -70,7 +69,7 @@ pub struct SStaticMeshInstances {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF)]
+#[tiger_type(id = 0xFFFFFFFF)]
 pub struct SStaticMeshInstanceGroup {
     pub instance_count: u16,
     pub instance_start: u16,
@@ -79,7 +78,7 @@ pub struct SStaticMeshInstanceGroup {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF)]
+#[tiger_type(id = 0xFFFFFFFF)]
 pub struct Unk808071a3 {
     pub rotation: glam::Quat,
     pub translation: glam::Vec3,
@@ -90,7 +89,7 @@ pub struct Unk808071a3 {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(id = 0xFFFFFFFF)]
+#[tiger_type(id = 0xFFFFFFFF)]
 pub struct SStaticMeshOverlay {
     pub render_stage: u8, // TfxRenderStage,
     pub unk1: u8,
@@ -110,7 +109,7 @@ pub struct SStaticMeshOverlay {
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 #[repr(u8)]
-#[tiger_tag]
+#[tiger_type]
 pub enum EPrimitiveType {
     PointList = 0,
     LineList = 1,
@@ -120,19 +119,19 @@ pub enum EPrimitiveType {
 }
 
 #[derive(Debug, Clone)]
-#[tiger_tag(etype = 32, esubtype = 4)]
+#[tiger_type(etype = 32, esubtype = 4)]
 pub struct TagHash {
-    #[tag(debug)]
+    #[tiger(debug)]
     pub value: u32,
 }
 
-#[tiger_tag]
+#[tiger_type]
 struct Test(i32, u32);
 
-#[tiger_tag]
+#[tiger_type]
 struct Test2(i32, u8, Substruct);
 
-#[tiger_tag]
+#[tiger_type]
 struct Substruct(u32);
 
 tiger_variant_enum! {

@@ -3,7 +3,7 @@ mod flags_impl;
 mod struct_impl;
 
 #[proc_macro_attribute]
-pub fn tiger_tag(
+pub fn tiger_type(
     attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {

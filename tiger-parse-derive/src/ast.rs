@@ -3,14 +3,7 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::ToTokens;
 use syn::punctuated::Punctuated;
-use syn::{Attribute, DataEnum, Generics, Meta, Token};
-
-pub struct EnumInput {
-    pub attrs: Vec<Attribute>,
-    pub ident: Ident,
-    pub generics: Generics,
-    pub data: DataEnum,
-}
+use syn::{Attribute, Meta, Token};
 
 const VALID_REPRS: &[&str] = &[
     "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64", "i128", "u128", "isize", "usize",
