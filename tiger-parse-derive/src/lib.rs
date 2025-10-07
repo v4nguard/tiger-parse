@@ -92,14 +92,11 @@ pub fn tiger_tag(
         quote! {}
     };
 
-    let mut fieldstream_zerocopy = TokenStream::new();
     let mut fieldstream_size = TokenStream::new();
 
     fieldstream_size.extend(quote! {
         0
     });
-
-    let mut zerocopy_base_safety = true;
 
     let mut last_offset = 0u64;
     let mut fieldstream = TokenStream::new();
@@ -131,7 +128,6 @@ pub fn tiger_tag(
             }
 
             uses_offsets = true;
-            zerocopy_base_safety = false;
             fieldstream.extend(quote! {
                 reader.seek(::std::io::SeekFrom::Start(start_pos+#field_offset))?;
             });
@@ -143,7 +139,6 @@ pub fn tiger_tag(
         }
 
         if d.debug {
-            zerocopy_base_safety = false;
             fieldstream.extend(quote! {
                 let offset = reader.stream_position()?;
             });
@@ -165,11 +160,6 @@ pub fn tiger_tag(
 
         fieldstream_size.extend(quote! {
             + <#ftype as ::tiger_parse::TigerReadable>::SIZE
-        });
-
-        // Carry over the zerocopy flag from fields. All fields must be ZEROCOPY for the struct to be ZEROCOPY
-        fieldstream_zerocopy.extend(quote! {
-            && <#ftype as ::tiger_parse::TigerReadable>::ZEROCOPY
         });
     }
 
@@ -282,7 +272,7 @@ pub fn tiger_tag(
                 Ok(#return_statement)
             }
 
-            const ZEROCOPY: bool = #zerocopy_base_safety #fieldstream_zerocopy;
+
 
             #impl_struct_id
             #impl_struct_type

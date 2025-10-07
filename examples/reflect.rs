@@ -1,8 +1,5 @@
 use chroma_dbg::ChromaConfig;
 
-#[cfg(not(feature = "reflect"))]
-compile_error!("The 'reflect' feature is required for the reflect example.");
-
 #[cfg(feature = "reflect")]
 #[tiger_parse::distributed_slice]
 static STRUCTS: [tiger_parse::reflect::ReflectedStruct];
@@ -116,6 +113,7 @@ mod structs {
     }
 }
 
+#[cfg(feature = "reflect")]
 fn main() {
     let cc = ChromaConfig {
         inline_struct: chroma_dbg::InlineThreshold::MaxLength(256),
@@ -126,4 +124,9 @@ fn main() {
         println!("{}", cc.format(s));
         println!("{s}");
     }
+}
+
+#[cfg(not(feature = "reflect"))]
+fn main() {
+    println!("The 'reflect' feature is required for the reflect example.");
 }

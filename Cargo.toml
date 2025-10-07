@@ -1,6 +1,6 @@
 [package]
 name = "tiger-parse"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 license = "MIT"
 
@@ -20,7 +20,7 @@ default = ["check_types"]
 
 32bit = []
 check_types = []
-# Check types in strict mode. 0xFFFFFFFF are not allowed in strict mode.
+# Check types in strict mode. 0xFFFFFFFF is not allowed in strict mode.
 check_types_strict = []
 tiger_pkg = ["dep:tiger-pkg"]
 check_types_debug = ["dep:tracing"]

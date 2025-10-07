@@ -5,28 +5,16 @@ impl<T: TigerReadable, const N: usize> TigerReadable for [T; N] {
         reader: &mut R,
         endian: crate::Endian,
     ) -> crate::Result<Self> {
-        let data = if T::ZEROCOPY && endian == crate::Endian::Little {
+        let mut data: Self = unsafe { std::mem::zeroed() };
+        for v in data.iter_mut() {
             unsafe {
-                let mut data: Self = std::mem::zeroed();
-                reader.read_exact(std::slice::from_raw_parts_mut(
-                    data.as_mut_ptr() as *mut u8,
-                    N * std::mem::size_of::<T>(),
-                ))?;
-                data
+                (&raw mut *v).write(T::read_ds_endian(reader, endian)?);
             }
-        } else {
-            let mut data: Self = unsafe { std::mem::zeroed() };
-            for v in data.iter_mut() {
-                *v = T::read_ds_endian(reader, endian)?;
-            }
-
-            data
-        };
+        }
 
         Ok(data)
     }
 
-    const ZEROCOPY: bool = T::ZEROCOPY;
     const SIZE: usize = N * T::SIZE;
 }
 

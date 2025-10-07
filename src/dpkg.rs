@@ -116,7 +116,7 @@ impl TigerReadable for TagHash {
         Ok(TagHash(u32::read_ds_endian(reader, endian)?))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -128,6 +128,6 @@ impl TigerReadable for TagHash64 {
         Ok(TagHash64(u64::read_ds_endian(reader, endian)?))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }

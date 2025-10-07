@@ -8,7 +8,7 @@ macro_rules! tuple_impls {
                 Ok(($($name::read_ds_endian(reader, endian)?,)+))
             }
 
-            const ZEROCOPY: bool = true $(&& $name::ZEROCOPY)+;
+            
 
             const SIZE: usize = 0 $(+ $name::SIZE)+;
         }

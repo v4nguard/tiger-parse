@@ -25,8 +25,6 @@ impl<T: TigerReadable> TigerReadable for Pointer<T> {
         Ok(Pointer(data, ptr as Offset))
     }
 
-    const ZEROCOPY: bool = false;
-
     const ID: Option<u32> = None;
     const SIZE: usize = std::mem::size_of::<Offset>();
 }
@@ -84,8 +82,6 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
 
         Ok(PointerOptional(Some(data), ptr_pos as Offset))
     }
-
-    const ZEROCOPY: bool = false;
 
     const ID: Option<u32> = None;
     const SIZE: usize = std::mem::size_of::<Offset>();
@@ -158,7 +154,6 @@ impl TigerReadable for ResourcePointer {
     }
 
     const ID: Option<u32> = None;
-    const ZEROCOPY: bool = false;
     const SIZE: usize = 8;
 }
 
@@ -221,7 +216,6 @@ impl TigerReadable for ResourcePointerWithClass {
         })
     }
 
-    const ZEROCOPY: bool = false;
     const ID: Option<u32> = None;
     const SIZE: usize = 8;
 }

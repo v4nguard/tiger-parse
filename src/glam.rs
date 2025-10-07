@@ -10,7 +10,7 @@ impl TigerReadable for glam::Vec2 {
         Ok(glam::Vec2::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -24,7 +24,7 @@ impl TigerReadable for glam::Vec3 {
         Ok(glam::Vec3::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -38,7 +38,7 @@ impl TigerReadable for glam::Vec4 {
         Ok(glam::Vec4::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -52,7 +52,7 @@ impl TigerReadable for glam::IVec2 {
         Ok(glam::IVec2::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -66,7 +66,7 @@ impl TigerReadable for glam::IVec3 {
         Ok(glam::IVec3::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -80,7 +80,7 @@ impl TigerReadable for glam::IVec4 {
         Ok(glam::IVec4::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -94,7 +94,7 @@ impl TigerReadable for glam::Quat {
         Ok(glam::Quat::from_array(data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
@@ -108,6 +108,6 @@ impl TigerReadable for glam::Mat4 {
         Ok(glam::Mat4::from_cols_array(&data))
     }
 
-    const ZEROCOPY: bool = true;
+    
     const SIZE: usize = std::mem::size_of::<Self>();
 }

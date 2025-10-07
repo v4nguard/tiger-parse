@@ -133,7 +133,7 @@ impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
     }
 
     const ID: Option<u32> = None;
-    const ZEROCOPY: bool = false;
+    
     const SIZE: usize = 8;
 }
 
@@ -164,7 +164,7 @@ impl<T: VariantEnum + Sized> TigerReadable for VariantPointer<T> {
     }
 
     const ID: Option<u32> = None;
-    const ZEROCOPY: bool = false;
+    
     const SIZE: usize = 8;
 }
 

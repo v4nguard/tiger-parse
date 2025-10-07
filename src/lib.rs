@@ -70,8 +70,6 @@ pub trait TigerReadable: Sized {
 
     fn read_ds_endian<R: Read + Seek>(reader: &mut R, endian: Endian) -> Result<Self>;
 
-    const ZEROCOPY: bool = false;
-
     /// 0x8080XXXX structure ID
     const ID: Option<u32> = None;
 
@@ -93,8 +91,6 @@ macro_rules! impl_read_primitives {
                         Endian::Big => <$typ>::from_be_bytes(bytes),
                     })
                 }
-
-                const ZEROCOPY: bool = true;
 
                 const SIZE: usize = $size;
             }
@@ -124,7 +120,6 @@ impl TigerReadable for () {
         Ok(())
     }
 
-    const ZEROCOPY: bool = true;
     const SIZE: usize = 0;
 }
 
@@ -133,7 +128,6 @@ impl TigerReadable for bool {
         Ok(u8::read_ds_endian(reader, endian)? != 0)
     }
 
-    const ZEROCOPY: bool = true;
     const SIZE: usize = 1;
 }
 

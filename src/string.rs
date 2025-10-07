@@ -22,8 +22,6 @@ impl TigerReadable for NullString {
         Err(Error::StringTooLong)
     }
 
-    const ZEROCOPY: bool = false;
-
     const ID: Option<u32> = None;
     const SIZE: usize = 0;
 }
