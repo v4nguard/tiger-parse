@@ -6,12 +6,12 @@ pub fn generate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let ident = &item.ident;
     quote! {
-        impl crate::TigerReadable for #ident {
+        impl ::tiger_parse::TigerReadable for #ident {
             fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
                 reader: &mut R,
-                endian: crate::Endian,
-            ) -> crate::Result<Self> {
-                let bits: <Self as bitflags::Flags>::Bits = crate::TigerReadable::read_ds_endian(reader, endian)?;
+                endian: ::tiger_parse::Endian,
+            ) -> ::tiger_parse::Result<Self> {
+                let bits: <Self as bitflags::Flags>::Bits = ::tiger_parse::TigerReadable::read_ds_endian(reader, endian)?;
                 Ok(<Self as bitflags::Flags>::from_bits_truncate(bits))
             }
 

@@ -28,8 +28,6 @@ mod tuples;
 mod variant;
 mod vector;
 
-#[cfg(feature = "bitflags")]
-mod bitflags_support;
 mod glam_support;
 
 #[cfg(feature = "reflect")]
