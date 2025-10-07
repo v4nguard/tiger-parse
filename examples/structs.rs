@@ -42,8 +42,8 @@ pub struct Unk8080719a {
     pub index_count: u32,
     pub buffer_index: u8,
     pub unk9: u8,
-    pub lod_category: u8,   //ELodCategory,
-    pub primitive_type: u8, //EPrimitiveType,
+    pub lod_category: u8, //ELodCategory,
+    pub primitive_type: EPrimitiveType,
 }
 
 #[derive(Debug, Clone)]
@@ -96,7 +96,7 @@ pub struct SStaticMeshOverlay {
     pub unk1: u8,
     pub lod: u8, // ELodCategory,
     pub unk3: i8,
-    pub primitive_type: u8, // EPrimitiveType,
+    pub primitive_type: EPrimitiveType,
     pub unk5: u8,
     pub unk6: u16,
     pub index_buffer: TagHash,
@@ -106,6 +106,17 @@ pub struct SStaticMeshOverlay {
     pub index_start: u32,
     pub index_count: u32,
     pub material: TagHash,
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+#[repr(u8)]
+#[tiger_tag]
+pub enum EPrimitiveType {
+    PointList = 0,
+    LineList = 1,
+    LineStrip = 2,
+    Triangles = 3,
+    TriangleStrip = 5,
 }
 
 #[derive(Debug, Clone)]
@@ -154,4 +165,9 @@ pub fn main() {
     };
 
     println!("Error (this is expected): {e}");
+
+    const ENUM_TEST: [u8; 4] = [0x3, 0x0, 0x0, 0x0];
+    let mut cursor = std::io::Cursor::new(&ENUM_TEST);
+    let e: EPrimitiveType = TigerReadable::read_ds(&mut cursor).unwrap();
+    assert_eq!(e, EPrimitiveType::Triangles);
 }

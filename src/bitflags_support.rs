@@ -1,20 +1,16 @@
-use tiger_parse_derive::TigerFlags;
-
-bitflags::bitflags! {
-    #[derive(Clone, TigerFlags)]
-    struct TestBitFlags32: u32 {
-        const NONE = 0;
-        const FLAG_A = 0x1;
-        const FLAG_B = 0x2;
-        const FLAG_C = 0x4;
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use tiger_parse_derive::TigerFlags;
+    bitflags::bitflags! {
+        #[derive(Clone, TigerFlags)]
+        struct TestBitFlags32: u32 {
+            const NONE = 0;
+            const FLAG_A = 0x1;
+            const FLAG_B = 0x2;
+            const FLAG_C = 0x4;
+        }
+    }
     use crate::TigerReadable;
-
-    use super::*;
 
     #[test]
     fn test_bitflags() {

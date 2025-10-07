@@ -1,3 +1,4 @@
+mod ast;
 mod flags_impl;
 mod struct_impl;
 

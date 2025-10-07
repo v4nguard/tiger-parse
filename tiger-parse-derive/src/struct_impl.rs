@@ -2,6 +2,8 @@ use darling::{ast::NestedMeta, FromField, FromMeta};
 use proc_macro2::{self, Ident, Span, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 
+use crate::ast::Repr;
+
 #[derive(Debug, Clone, Copy, Default, FromMeta)]
 #[darling(default)]
 enum FieldType {
@@ -50,8 +52,44 @@ pub fn generate(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let item2 = item.clone();
-    let mut struc = syn::parse_macro_input!(item2 as syn::ItemStruct);
+    let input = syn::parse_macro_input!(item2 as syn::DeriveInput);
+    match input.data {
+        syn::Data::Struct(data_struct) => {
+            let struc = syn::ItemStruct {
+                attrs: input.attrs.clone(),
+                vis: input.vis.clone(),
+                struct_token: data_struct.struct_token,
+                ident: input.ident.clone(),
+                generics: input.generics.clone(),
+                fields: data_struct.fields.clone(),
+                semi_token: data_struct.semi_token,
+            };
+            generate_struct(attr, struc)
+        }
+        syn::Data::Enum(data_enum) => {
+            let enumm = syn::ItemEnum {
+                attrs: input.attrs.clone(),
+                vis: input.vis.clone(),
+                enum_token: data_enum.enum_token,
+                ident: input.ident.clone(),
+                generics: input.generics.clone(),
+                brace_token: data_enum.brace_token,
+                variants: data_enum.variants.clone(),
+            };
 
+            generate_enum(enumm)
+        }
+        syn::Data::Union(_) => quote! {
+            compile_error!("Unions are not supported");
+        }
+        .into(),
+    }
+}
+
+fn generate_struct(
+    attr: proc_macro::TokenStream,
+    mut struc: syn::ItemStruct,
+) -> proc_macro::TokenStream {
     let args = NestedMeta::parse_meta_list(attr.into()).unwrap();
     let opts = match <Opts as darling::FromMeta>::from_list(&args) {
         Ok(x) => x,
@@ -347,4 +385,40 @@ fn type_to_reflect(ty: &syn::Type) -> TokenStream {
     };
 
     quote!(::tiger_parse::reflect::ReflectedType::#t)
+}
+
+// Only works on enums that don't have any data associated with their variants. Simply reads the repr type and matches it to the variant.
+// Doesn't take any attributes (besides repr)
+fn generate_enum(enumm: syn::ItemEnum) -> proc_macro::TokenStream {
+    let ident = enumm.ident.clone();
+
+    let enum_idents: Vec<Ident> = enumm.variants.iter().map(|v| v.ident.clone()).collect();
+
+    let repr = Repr::from_attributes(&enumm.attrs).unwrap();
+    let repr_type = repr.ident;
+
+    let impl_struct_size = quote! {
+        const SIZE: usize = <#repr_type as ::tiger_parse::TigerReadable>::SIZE;
+    };
+
+    let variant_match = quote! {
+        let value = <#repr_type as ::tiger_parse::TigerReadable>::read_ds_endian(reader, endian)?;
+        match value {
+            #(x if x == (Self::#enum_idents as #repr_type) => Ok(#ident::#enum_idents),)*
+            _ => Err(::tiger_parse::error::Error::EnumVariantOutOfRange(value as usize)),
+        }
+    };
+
+    quote! {
+        #enumm
+
+        impl ::tiger_parse::TigerReadable for #ident {
+            fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
+                #variant_match
+            }
+
+            const ID: Option<u32> = None;
+            #impl_struct_size
+        }
+    }.into()
 }
