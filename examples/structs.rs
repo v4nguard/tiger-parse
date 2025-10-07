@@ -15,7 +15,7 @@ pub struct SStaticMesh {
     pub _pad: Padding<4>,
     #[tag(debug)]
     pub materials: Vec<TagHash>,
-    pub unk20: Vec<SStaticMeshOverlay>, // Overlay/transparent meshes
+    pub unk20: Vec<Box<SStaticMeshOverlay>>, // Overlay/transparent meshes
     pub unk30: [u32; 2],
     pub unk38: [f32; 6],
     pub unk50: glam::Vec3, // ? Similar to model_offset, but not quite right...

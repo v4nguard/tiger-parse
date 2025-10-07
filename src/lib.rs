@@ -23,11 +23,14 @@ pub use variant::{OptionalVariantPointer, VariantEnum, VariantPointer};
 pub type FnvHash = u32;
 
 mod array;
-mod glam;
 mod padding;
 mod tuples;
 mod variant;
 mod vector;
+
+#[cfg(feature = "bitflags")]
+mod bitflags_support;
+mod glam_support;
 
 #[cfg(feature = "reflect")]
 pub mod reflect;
