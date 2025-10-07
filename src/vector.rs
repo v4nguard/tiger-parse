@@ -1,6 +1,3 @@
-use core::slice;
-use std::mem;
-
 use crate::{error::Error, Offset, Size, TigerReadable};
 
 impl<T: TigerReadable> TigerReadable for Vec<T> {
