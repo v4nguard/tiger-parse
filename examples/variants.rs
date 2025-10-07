@@ -1,5 +1,7 @@
 use tiger_parse::*;
 
+tiger_parse::reflection_container!();
+
 fn main() {
     #[tiger_tag(id = 0x11111111)]
     struct VariantA;

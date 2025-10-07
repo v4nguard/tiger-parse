@@ -1,8 +1,4 @@
-use chroma_dbg::ChromaConfig;
-
-#[cfg(feature = "reflect")]
-#[tiger_parse::distributed_slice]
-static STRUCTS: [tiger_parse::reflect::ReflectedStruct];
+tiger_parse::reflection_container!();
 
 #[cfg(feature = "reflect")]
 mod structs {
@@ -115,6 +111,7 @@ mod structs {
 
 #[cfg(feature = "reflect")]
 fn main() {
+    use chroma_dbg::ChromaConfig;
     let cc = ChromaConfig {
         inline_struct: chroma_dbg::InlineThreshold::MaxLength(256),
         integer_format: chroma_dbg::IntegerFormat::HexWhenOver(8),

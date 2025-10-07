@@ -3,9 +3,7 @@ use std::io::Cursor;
 use tiger_parse::{tiger_variant_enum, Endian, Padding, TigerReadable};
 use tiger_parse_derive::tiger_tag;
 
-#[cfg(feature = "reflect")]
-#[tiger_parse::distributed_slice]
-static STRUCTS: [tiger_parse::reflect::ReflectedStruct];
+tiger_parse::reflection_container!();
 
 #[derive(Debug, Clone)]
 #[tiger_tag(id = 0x80806D44)]

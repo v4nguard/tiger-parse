@@ -144,3 +144,18 @@ where
 
     const SIZE: usize = T::SIZE;
 }
+
+#[cfg(feature = "reflect")]
+#[macro_export]
+macro_rules! reflection_container {
+    () => {
+        #[$crate::distributed_slice]
+        static STRUCTS: [$crate::reflect::ReflectedStruct];
+    };
+}
+
+#[cfg(not(feature = "reflect"))]
+#[macro_export]
+macro_rules! reflection_container {
+    () => {};
+}
