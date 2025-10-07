@@ -114,6 +114,12 @@ impl<T: TigerReadable + Debug> Debug for PointerOptional<T> {
     }
 }
 
+impl<T: TigerReadable + Clone> Clone for PointerOptional<T> {
+    fn clone(&self) -> Self {
+        PointerOptional(self.0.clone(), self.1)
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct ResourcePointer {
     pub offset: u64,
