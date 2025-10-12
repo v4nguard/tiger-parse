@@ -80,7 +80,7 @@ impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
 
         reader.seek(std::io::SeekFrom::Start(save_pos))?;
 
-        Ok(PointerOptional(Some(data), ptr_pos as Offset))
+        Ok(PointerOptional(Some(data), ptr as Offset))
     }
 
     const ID: Option<u32> = None;
