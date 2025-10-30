@@ -43,14 +43,19 @@ pub enum Error {
 
 /// Represents a field in a propagated error, eg. `User.name`
 #[derive(Debug)]
-pub struct FieldRecord {
-    pub typename: String,
-    pub field: String,
+pub enum FieldRecord {
+    Field { typename: String, field: String },
+    Element { index: usize },
 }
 
 impl Display for FieldRecord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}.{}", self.typename, self.field))
+        match self {
+            FieldRecord::Field { typename, field } => {
+                f.write_fmt(format_args!("{typename}.{field}"))
+            }
+            FieldRecord::Element { index } => f.write_fmt(format_args!("[{index}]")),
+        }
     }
 }
 
@@ -66,19 +71,20 @@ impl FieldRecordStack {
 
 impl Display for FieldRecordStack {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("[")?;
+        f.write_str("{")?;
         for (i, record) in self.0.iter().enumerate() {
-            if i > 0 {
+            if i > 0 && !matches!(record, FieldRecord::Element { .. }) {
                 f.write_str(" -> ")?;
             }
             record.fmt(f)?;
         }
-        f.write_str("]")
+        f.write_str("}")
     }
 }
 
 pub trait ResultExt<T> {
     fn with_field(self, typename: &str, field: &str) -> Result<T, Error>;
+    fn with_array_element(self, index: usize) -> Result<T, Error>;
 }
 
 impl<T> ResultExt<T> for Result<T, Error> {
@@ -88,7 +94,7 @@ impl<T> ResultExt<T> for Result<T, Error> {
             Err(error) => match error {
                 // Add to existing propagated error
                 Error::PropagatedError { mut stack, error } => {
-                    stack.push_front(FieldRecord {
+                    stack.push_front(FieldRecord::Field {
                         typename: typename.to_string(),
                         field: field.to_string(),
                     });
@@ -97,10 +103,29 @@ impl<T> ResultExt<T> for Result<T, Error> {
                 }
                 // New propagated error
                 e => Err(Error::PropagatedError {
-                    stack: FieldRecordStack(vec![FieldRecord {
+                    stack: FieldRecordStack(vec![FieldRecord::Field {
                         typename: typename.to_string(),
                         field: field.to_string(),
                     }]),
+                    error: Box::new(e),
+                }),
+            },
+        }
+    }
+
+    fn with_array_element(self, index: usize) -> Result<T, Error> {
+        match self {
+            Ok(value) => Ok(value),
+            Err(error) => match error {
+                // Add to existing propagated error
+                Error::PropagatedError { mut stack, error } => {
+                    stack.push_front(FieldRecord::Element { index });
+
+                    Err(Error::PropagatedError { stack, error })
+                }
+                // New propagated error
+                e => Err(Error::PropagatedError {
+                    stack: FieldRecordStack(vec![FieldRecord::Element { index }]),
                     error: Box::new(e),
                 }),
             },

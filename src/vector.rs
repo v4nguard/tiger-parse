@@ -1,4 +1,4 @@
-use crate::{error::Error, Offset, Size, TigerReadable};
+use crate::{error::Error, Offset, ResultExt, Size, TigerReadable};
 
 impl<T: TigerReadable> TigerReadable for Vec<T> {
     fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
@@ -47,8 +47,8 @@ impl<T: TigerReadable> TigerReadable for Vec<T> {
 
         reader.seek(std::io::SeekFrom::Start(ptr + 16))?;
         let mut data = Vec::with_capacity(size);
-        for _ in 0..size {
-            data.push(T::read_ds_endian(reader, endian)?);
+        for i in 0..size {
+            data.push(T::read_ds_endian(reader, endian).with_array_element(i)?);
         }
 
         reader.seek(std::io::SeekFrom::Start(save_pos))?;

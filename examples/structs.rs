@@ -132,7 +132,7 @@ struct Test(i32, u32);
 struct Test2(i32, u8, Substruct);
 
 #[tiger_type]
-struct Substruct(u32);
+struct Substruct([u32; 4]);
 
 tiger_variant_enum! {
     [Unknown(true)]
@@ -156,7 +156,7 @@ pub fn main() {
     assert_eq!(test.0, -2);
     assert_eq!(test.1, 123);
 
-    const TEST2: [u8; 8] = [0xfe, 0xff, 0xff, 0xff, 0x7b, 0x00, 0x00, 0x00];
+    const TEST2: [u8; 10] = [0xfe, 0xff, 0xff, 0xff, 0x7b, 0x00, 0x00, 0x00, 0x01, 0x02];
     let mut cursor = std::io::Cursor::new(&TEST2);
 
     let Err(e) = Test2::read_ds(&mut cursor) else {
