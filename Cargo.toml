@@ -1,6 +1,6 @@
 [package]
 name = "tiger-parse"
-version = "0.7.1"
+version = "0.7.2"
 edition = "2021"
 license = "MIT"
 
@@ -12,7 +12,7 @@ thiserror = "1"
 tiger-parse-derive = { path = "./tiger-parse-derive" }
 
 linkme = { version = "0.3", optional = true }
-tiger-pkg = { version = "0.18", optional = true }
+tiger-pkg = { version = "0.19", optional = true }
 tracing = { version = "0.1", optional = true }
 
 [features]
