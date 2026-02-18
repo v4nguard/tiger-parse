@@ -2,7 +2,7 @@ tiger_parse::reflection_container!();
 
 #[cfg(feature = "reflect")]
 mod structs {
-    use tiger_parse::tiger_tag;
+    use tiger_parse::tiger_type;
 
     #[derive(Debug, Clone)]
     #[tiger_type]
