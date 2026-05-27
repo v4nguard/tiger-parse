@@ -134,7 +134,7 @@ impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
 
     const ID: Option<u32> = None;
 
-    const SIZE: usize = 8;
+    const SIZE: usize = std::mem::size_of::<Offset>();
 }
 
 impl<T: VariantEnum + Sized> std::ops::Deref for OptionalVariantPointer<T> {
@@ -165,7 +165,7 @@ impl<T: VariantEnum + Sized> TigerReadable for VariantPointer<T> {
 
     const ID: Option<u32> = None;
 
-    const SIZE: usize = 8;
+    const SIZE: usize = std::mem::size_of::<Offset>();
 }
 
 impl<T: VariantEnum + Sized> std::ops::Deref for VariantPointer<T> {

@@ -154,7 +154,7 @@ impl TigerReadable for ResourcePointer {
     }
 
     const ID: Option<u32> = None;
-    const SIZE: usize = 8;
+    const SIZE: usize = std::mem::size_of::<Offset>();
 }
 
 impl Debug for ResourcePointer {
@@ -217,7 +217,7 @@ impl TigerReadable for ResourcePointerWithClass {
     }
 
     const ID: Option<u32> = None;
-    const SIZE: usize = 8;
+    const SIZE: usize = std::mem::size_of::<Offset>();
 }
 
 #[cfg(feature = "tiger_pkg")]
