@@ -1,10 +1,7 @@
-use crate::{error::Error, Offset, ResultExt, Size, TigerReadable};
+use crate::{error::Error, Offset, ResultExt, Size, TigerReadable, TigerReader};
 
 impl<T: TigerReadable> TigerReadable for Vec<T> {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let size = Size::read_ds_endian(reader, endian)? as usize;
         let ptr = reader.stream_position()? + Offset::read_ds_endian(reader, endian)? as u64;
         let save_pos = reader.stream_position()?;

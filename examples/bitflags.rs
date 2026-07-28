@@ -1,4 +1,4 @@
-use tiger_parse::{TigerFlags, TigerReadable};
+use tiger_parse::{TigerFlags, TigerReadable, TigerReader};
 
 bitflags::bitflags! {
     #[derive(Debug, Clone, TigerFlags)]

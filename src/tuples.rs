@@ -1,14 +1,14 @@
-use crate::TigerReadable;
+use crate::{TigerReadable, TigerReader};
 
 macro_rules! tuple_impls {
     ( $( $name:ident )+ ) => {
         impl<$($name: TigerReadable),+> TigerReadable for ($($name,)+)
         {
-            fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: crate::Endian) -> crate::Result<Self> {
+            fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
                 Ok(($($name::read_ds_endian(reader, endian)?,)+))
             }
 
-            
+
 
             const SIZE: usize = 0 $(+ $name::SIZE)+;
         }

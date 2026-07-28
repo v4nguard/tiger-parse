@@ -255,7 +255,7 @@ pub fn generate(
         #item_stream
 
         impl ::tiger_parse::TigerReadable for #ident {
-            fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
+            fn read_ds_endian(reader: &mut dyn ::tiger_parse::TigerReader, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
                 use tiger_parse::ResultExt;
                 let start_pos = reader.stream_position()?;
 

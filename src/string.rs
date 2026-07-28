@@ -1,13 +1,10 @@
-use crate::{error::Error, TigerReadable};
+use crate::{error::Error, TigerReadable, TigerReader};
 
 #[derive(Debug, Clone)]
 pub struct NullString(pub String);
 
 impl TigerReadable for NullString {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        _endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, _endian: crate::Endian) -> crate::Result<Self> {
         let mut buf = String::new();
 
         let mut b = [0u8; 1];

@@ -4,15 +4,12 @@ use std::{
     ops::Deref,
 };
 
-use crate::{Offset, TigerReadable};
+use crate::{Offset, TigerReadable, TigerReader};
 
 pub struct Pointer<T: TigerReadable>(pub T, Offset);
 
 impl<T: TigerReadable> TigerReadable for Pointer<T> {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let ptr = reader.stream_position()? as i64 + Offset::read_ds_endian(reader, endian)? as i64;
         let save_pos = reader.stream_position()?;
 
@@ -61,10 +58,7 @@ impl<T: TigerReadable + Clone> Clone for Pointer<T> {
 pub struct PointerOptional<T: TigerReadable>(pub Option<T>, Offset);
 
 impl<T: TigerReadable> TigerReadable for PointerOptional<T> {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let ptr_pos = reader.stream_position()? as i64;
         let ptr_data = Offset::read_ds_endian(reader, endian)?;
         if ptr_data == 0 {
@@ -124,10 +118,7 @@ pub struct ResourcePointer {
 }
 
 impl TigerReadable for ResourcePointer {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
         let offset: Offset = TigerReadable::read_ds_endian(reader, endian)?;
         if offset == 0 || offset == Offset::MAX {
@@ -180,10 +171,7 @@ pub struct ResourcePointerWithClass {
 
 #[cfg(feature = "tiger_pkg")]
 impl TigerReadable for ResourcePointerWithClass {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
         let offset: Offset = TigerReadable::read_ds_endian(reader, endian)?;
         if offset == 0 || offset == Offset::MAX {

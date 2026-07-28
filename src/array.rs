@@ -1,10 +1,7 @@
-use crate::{ResultExt, TigerReadable};
+use crate::{ResultExt, TigerReadable, TigerReader};
 
 impl<T: TigerReadable, const N: usize> TigerReadable for [T; N] {
-    fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let mut data: Self = unsafe { std::mem::zeroed() };
         for (i, v) in data.iter_mut().enumerate() {
             unsafe {

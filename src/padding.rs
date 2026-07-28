@@ -1,13 +1,10 @@
-use crate::{error::Error, TigerReadable};
+use crate::{error::Error, TigerReadable, TigerReader};
 
 #[derive(Debug, Clone)]
 pub struct Padding<const N: usize>;
 
 impl<const N: usize> TigerReadable for Padding<N> {
-    fn read_ds_endian<R: std::io::Read + std::io::Seek>(
-        reader: &mut R,
-        _endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, _endian: crate::Endian) -> crate::Result<Self> {
         // Read N bytes and make sure they are all zero
         let mut buf = [0; N];
         reader.read_exact(&mut buf)?;

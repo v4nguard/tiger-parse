@@ -1,12 +1,12 @@
 use std::io::SeekFrom;
 
-use crate::{error::Error, Offset, TigerReadable};
+use crate::{error::Error, Offset, TigerReadable, TigerReader};
 
 pub trait VariantEnum: Sized {
     const EXTRA_OFFSET: i64 = 0;
 
-    fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
+    fn read_variant_endian(
+        reader: &mut dyn TigerReader,
         endian: crate::Endian,
         class: u32,
     ) -> crate::Result<Self>;
@@ -68,8 +68,8 @@ macro_rules! tiger_variant_enum {
             $(
                 const EXTRA_OFFSET: i64 = $offset;
             )*
-            fn read_variant_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-                reader: &mut R,
+            fn read_variant_endian(
+                reader: &mut dyn $crate::TigerReader,
                 endian: $crate::Endian,
                 class: u32,
             ) -> $crate::Result<Self> {
@@ -108,10 +108,7 @@ macro_rules! tiger_variant_enum {
 pub struct OptionalVariantPointer<T: VariantEnum + Sized>(Option<T>);
 
 impl<T: VariantEnum + Sized> TigerReadable for OptionalVariantPointer<T> {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let offset_base = reader.stream_position()?;
         let offset: Offset = TigerReadable::read_ds_endian(reader, endian)?;
         if offset == 0 || offset == Offset::MAX {
@@ -155,10 +152,7 @@ impl<T: VariantEnum + Sized + Clone> Clone for OptionalVariantPointer<T> {
 pub struct VariantPointer<T: VariantEnum + Sized>(T);
 
 impl<T: VariantEnum + Sized> TigerReadable for VariantPointer<T> {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         let inner: OptionalVariantPointer<T> = TigerReadable::read_ds_endian(reader, endian)?;
         Ok(Self(inner.0.ok_or(Error::PointerNull)?))
     }

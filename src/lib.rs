@@ -63,13 +63,17 @@ pub enum Endian {
     Big,
 }
 
+pub trait TigerReader: Read + Seek {}
+
+impl<T: Read + Seek> TigerReader for T {}
+
 pub trait TigerReadable: Sized {
     // TODO(cohae): Destiny reader
-    fn read_ds<R: Read + Seek>(reader: &mut R) -> Result<Self> {
+    fn read_ds(reader: &mut dyn TigerReader) -> Result<Self> {
         Self::read_ds_endian(reader, Endian::Little)
     }
 
-    fn read_ds_endian<R: Read + Seek>(reader: &mut R, endian: Endian) -> Result<Self>;
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: Endian) -> Result<Self>;
 
     /// 0x8080XXXX structure ID
     const ID: Option<u32> = None;
@@ -84,7 +88,7 @@ macro_rules! impl_read_primitives {
     ($($typ:ty : $size:expr),+) => {
         $(
             impl TigerReadable for $typ {
-                fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: Endian) -> Result<Self> {
+                fn read_ds_endian(reader: &mut dyn TigerReader, endian: Endian) -> Result<Self> {
                     let mut bytes = [0u8; $size];
                     reader.read_exact(&mut bytes)?;
                     Ok(match endian {
@@ -117,7 +121,7 @@ impl_read_primitives! {
 }
 
 impl TigerReadable for () {
-    fn read_ds_endian<R: Read + Seek>(_reader: &mut R, _endian: crate::Endian) -> Result<Self> {
+    fn read_ds_endian(_reader: &mut dyn TigerReader, _endian: crate::Endian) -> Result<Self> {
         Ok(())
     }
 
@@ -125,7 +129,7 @@ impl TigerReadable for () {
 }
 
 impl TigerReadable for bool {
-    fn read_ds_endian<R: Read + Seek>(reader: &mut R, endian: crate::Endian) -> Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> Result<Self> {
         Ok(u8::read_ds_endian(reader, endian)? != 0)
     }
 
@@ -136,7 +140,7 @@ impl<T> TigerReadable for Box<T>
 where
     T: TigerReadable,
 {
-    fn read_ds_endian<R: Read + Seek>(reader: &mut R, endian: Endian) -> Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: Endian) -> Result<Self> {
         Ok(Box::new(T::read_ds_endian(reader, endian)?))
     }
 

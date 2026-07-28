@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use tiger_pkg::{TagHash, TagHash64, Version};
 
-use crate::{error::Error, TigerReadable};
+use crate::{error::Error, TigerReadable, TigerReader};
 
 pub trait PackageManagerExt {
     fn read_tag_struct<T: TigerReadable>(&self, tag: impl Into<TagHash>) -> crate::Result<T>;
@@ -109,25 +109,17 @@ impl From<tiger_pkg::Endian> for crate::Endian {
 }
 
 impl TigerReadable for TagHash {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         Ok(TagHash(u32::read_ds_endian(reader, endian)?))
     }
 
-    
     const SIZE: usize = std::mem::size_of::<Self>();
 }
 
 impl TigerReadable for TagHash64 {
-    fn read_ds_endian<R: std::io::prelude::Read + std::io::prelude::Seek>(
-        reader: &mut R,
-        endian: crate::Endian,
-    ) -> crate::Result<Self> {
+    fn read_ds_endian(reader: &mut dyn TigerReader, endian: crate::Endian) -> crate::Result<Self> {
         Ok(TagHash64(u64::read_ds_endian(reader, endian)?))
     }
 
-    
     const SIZE: usize = std::mem::size_of::<Self>();
 }

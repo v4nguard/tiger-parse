@@ -27,7 +27,7 @@ pub fn generate(enumm: syn::ItemEnum) -> proc_macro::TokenStream {
         #enumm
 
         impl ::tiger_parse::TigerReadable for #ident {
-            fn read_ds_endian<R: ::std::io::Read + ::std::io::Seek>(reader: &mut R, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
+            fn read_ds_endian(reader: &mut dyn ::tiger_parse::TigerReader, endian: ::tiger_parse::Endian) -> ::tiger_parse::Result<Self> {
                 #variant_match
             }
 
